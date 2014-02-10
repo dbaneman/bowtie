@@ -14,6 +14,9 @@ public class Conf implements IConf {
     public static final String DEFAULT_CONF_APPLICATION_FILE_LOCATION = "/opt/bowtie/conf/bowtie.conf";
 
     public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-size-in-mb";
+    public static final String DATA_DIR = "bowtie.data-dir";
+    public static final String HOME_DIR = "bowtie.home-dir";
+    public static final String BYTES_BETWEEN_INDEXED_KEYS = "bowtie.bytes-between-indexed-keys";
 
     private final Config config;
 

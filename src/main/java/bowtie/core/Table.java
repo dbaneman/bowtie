@@ -1,5 +1,7 @@
 package bowtie.core;
 
+import java.io.IOException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dan
@@ -11,11 +13,13 @@ public class Table implements ITable, ITableReader {
     private final IConf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
+    private final IFileIndex fileIndex;
 
     public Table(final IConf conf) {
         this.conf = conf;
-        memTable = new MemTable(conf);
-        fsTable = new FileSysTable(conf);
+        fileIndex = new FileIndex();
+        memTable = new MemTable(conf, fileIndex);
+        fsTable = new FileSysTable(conf, fileIndex);
     }
 
     @Override
@@ -24,7 +28,7 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public void put(final byte[] key, final byte[] value) {
+    public void put(final byte[] key, final byte[] value) throws IOException {
         memTable.put(key, value);
         if (memTable.isFull()) {
             memTable.flush();

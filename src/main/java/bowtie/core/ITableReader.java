@@ -1,5 +1,7 @@
 package bowtie.core;
 
+import java.io.IOException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dan
@@ -9,6 +11,6 @@ package bowtie.core;
  */
 public interface ITableReader {
     IConf getConf();
-    Iterable<IResult> scan(byte[] inclStart, byte[] exclStop);
-    IResult get(byte[] key);
+    Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException;
+    IResult get(byte[] key) throws IOException;
 }

@@ -1,5 +1,7 @@
 package bowtie.core;
 
+import java.io.IOException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dan
@@ -8,5 +10,5 @@ package bowtie.core;
  * To change this template use File | Settings | File Templates.
  */
 public interface ITable extends ITableReader {
-    void put(byte[] key, byte[] value);
+    void put(byte[] key, byte[] value) throws IOException;
 }

@@ -1,6 +1,8 @@
 package bowtie.core;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,10 +12,14 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class ChainedIterable<T> implements Iterable<T> {
-    private final Iterable<T>[] iterables;
+    private final List<Iterable<T>> iterables;
+
+    public ChainedIterable(List<Iterable<T>> iterables) {
+        this.iterables = iterables;
+    }
 
     public ChainedIterable(Iterable<T>... iterables) {
-        this.iterables = iterables;
+        this(Arrays.asList(iterables));
     }
 
     @Override
@@ -22,11 +28,11 @@ public class ChainedIterable<T> implements Iterable<T> {
     }
 
     public static class ChainedIterator<T> implements Iterator<T>  {
-        private final Iterable<T>[] iterables;
+        private final List<Iterable<T>> iterables;
         int currentIteratorIndex;
         Iterator<T> currentIterator;
 
-        ChainedIterator(final Iterable<T>[] iterables) {
+        ChainedIterator(final List<Iterable<T>> iterables) {
             this.iterables = iterables;
             currentIteratorIndex = -1;
             advanceToNextIterator();
@@ -48,8 +54,8 @@ public class ChainedIterable<T> implements Iterable<T> {
         }
 
         boolean advanceToNextIterator() {
-            if (++currentIteratorIndex < iterables.length) {
-                currentIterator = iterables[currentIteratorIndex].iterator();
+            if (++currentIteratorIndex < iterables.size()) {
+                currentIterator = iterables.get(currentIteratorIndex).iterator();
                 return true;
             }
             currentIterator = null;

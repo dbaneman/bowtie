@@ -1,5 +1,11 @@
 package bowtie.core;
 
+import com.eaio.uuid.UUID;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
@@ -13,18 +19,18 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class MemTable implements ITable {
-    private SortedMap<byte[], byte[]> map;
+    private SortedMap<byte[], byte[]> writeMap; // writes go from here
+    private SortedMap<byte[], byte[]> readMap; // reads come from here
     private final IConf conf;
+    private final IFileIndex fileIndex;
     private long size;
 
-    public MemTable(final IConf conf) {
+    public MemTable(final IConf conf, final IFileIndex fileIndex) {
         this.conf = conf;
-        resetMap();
+        this.fileIndex = fileIndex;
+        writeMap = new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
+        readMap = writeMap;
         size = 0;
-    }
-
-    private void resetMap() {
-        map = new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
     }
 
     @Override
@@ -34,7 +40,7 @@ public class MemTable implements ITable {
 
     @Override
     public Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) {
-        final Iterator<Map.Entry<byte[], byte[]>> subMapIterator = map.subMap(inclStart, exclStop).entrySet().iterator();
+        final Iterator<Map.Entry<byte[], byte[]>> subMapIterator = readMap.subMap(inclStart, exclStop).entrySet().iterator();
         return new Iterable<IResult>() {
             @Override
             public Iterator<IResult> iterator() {
@@ -61,24 +67,53 @@ public class MemTable implements ITable {
 
     @Override
     public void put(byte[] key, byte[] value) {
-        map.put(key, value);
+        writeMap.put(key, value);
         size += key.length + value.length;
     }
 
     @Override
     public IResult get(byte[] key) {
-        return new Result(key, map.get(key));
+        return new Result(key, readMap.get(key));
     }
 
     public boolean isFull() {
         return size >= getConf().getLong(Conf.MAX_MEM_STORE_SIZE);
     }
 
-    public void flush() {
-        SortedMap<byte[], byte[]> mapForFlushing = map;
-        resetMap();
-        for (Map.Entry<byte[], byte[]> entry : mapForFlushing.entrySet()) {
+    public synchronized void flush() throws IOException {
+        writeMap = new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
 
+        // flush read map to file
+        IFileIndexEntry fileIndexEntry = new FileIndexEntry();
+        String fileName = new UUID().toString();
+        fileIndexEntry.setFileName(fileName);
+        OutputStream fileOutputStream = new FileOutputStream(getConf().getString(Conf.DATA_DIR) + "/" + fileName);
+        boolean first = true;
+        long currentSize = 0;
+        for (Map.Entry<byte[], byte[]> entry : readMap.entrySet()) {
+            if (first) {
+                fileIndexEntry.setStartKey(entry.getKey());
+                first = false;
+            }
+            int sizeOfEntry = 2 + entry.getKey().length + 2 + entry.getValue().length;
+            ByteBuffer byteBuffer = ByteBuffer.allocate(sizeOfEntry);
+            byteBuffer.putShort((short) entry.getKey().length);
+            byteBuffer.put(entry.getKey());
+            byteBuffer.putShort((short) entry.getValue().length);
+            byteBuffer.put(entry.getValue());
+            fileOutputStream.write(byteBuffer.array());
+            fileIndexEntry.setEndKey(entry.getKey());
+            if (currentSize > getConf().getLong(Conf.BYTES_BETWEEN_INDEXED_KEYS)) {
+                fileIndexEntry.addIndexedKey(entry.getKey(), currentSize);
+                currentSize = 0;
+            }
+            currentSize += sizeOfEntry;
         }
+        fileOutputStream.close();
+
+        // update file index
+        fileIndex.addEntry(fileIndexEntry);
+
+        readMap = writeMap;
     }
 }
