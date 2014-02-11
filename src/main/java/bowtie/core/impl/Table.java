@@ -2,10 +2,11 @@ package bowtie.core.impl;
 
 import bowtie.core.api.external.IResult;
 import bowtie.core.api.external.ITable;
-import bowtie.core.api.internal.IConf;
+import bowtie.core.api.external.IConf;
 import bowtie.core.api.internal.IFileIndex;
-import bowtie.core.api.internal.ITableReader;
+import bowtie.core.api.external.ITableReader;
 import bowtie.core.util.ChainedIterable;
+import bowtie.core.util.GetOne;
 
 import java.io.IOException;
 
@@ -20,12 +21,14 @@ public class Table implements ITable, ITableReader {
     private final IConf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
+    private final GetOne<IResult> getOneResult;
 
     public Table(final IConf conf) {
         this.conf = conf;
         IFileIndex fileIndex = new FileIndex();
         memTable = new MemTable(conf, fileIndex);
         fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex));
+        getOneResult = new GetOne<IResult>();
     }
 
     @Override
@@ -34,11 +37,22 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public void put(final byte[] key, final byte[] value) throws IOException {
-        memTable.put(key, value);
+    public void append(byte[] key, byte[] value) throws IOException {
+        memTable.append(key, value);
         if (memTable.isFull()) {
             memTable.flush();
         }
+    }
+
+    @Override
+    public void put(final byte[] key, final byte[] value) throws IOException {
+        delete(key);
+        append(key, value);
+    }
+
+    @Override
+    public void delete(byte[] key) throws IOException {
+        memTable.delete(key);
     }
 
     @Override
@@ -47,9 +61,21 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public IResult get(final byte[] key) throws IOException {
-        final IResult memVal = memTable.get(key);
-        return memVal != null ? memVal : fsTable.get(key);
+    public Iterable<IResult>get(final byte[] key) throws IOException {
+        return scan(key, null);
+    }
+
+    @Override
+    public IResult getOne(byte[] key) throws IOException {
+        final Iterable<IResult> hits = get(key);
+        return getOneResult.apply(hits);
+
+    }
+
+    @Override
+    public IResult scanOne(byte[] inclStart, byte[] exclStop) throws IOException {
+        final Iterable<IResult> hits = scan(inclStart, exclStop);
+        return getOneResult.apply(hits);
     }
 
 }

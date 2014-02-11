@@ -1,5 +1,6 @@
 package bowtie.core.api.internal;
 
+import bowtie.core.api.external.IConfBacked;
 import bowtie.core.api.external.IResult;
 
 import java.io.IOException;

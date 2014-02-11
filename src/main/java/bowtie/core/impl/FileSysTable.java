@@ -1,10 +1,10 @@
 package bowtie.core.impl;
 
+import bowtie.core.api.external.IConf;
 import bowtie.core.api.external.IResult;
-import bowtie.core.api.internal.IConf;
 import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.api.internal.IFileReader;
-import bowtie.core.api.internal.ITableReader;
+import bowtie.core.api.internal.IFileSysTable;
 import bowtie.core.util.ChainedIterable;
 import bowtie.core.util.GetOne;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * Time: 9:02 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileSysTable implements ITableReader {
+public class FileSysTable implements IFileSysTable {
     private final IConf conf;
     private final IFileIndex fileIndex;
     private final IFileReader fileReader;
@@ -44,12 +44,6 @@ public class FileSysTable implements ITableReader {
             possibleHitIterators.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
         }
         return new ChainedIterable<IResult>(possibleHitIterators);
-    }
-
-    @Override
-    public IResult get(byte[] key) throws IOException {
-        Iterable<IResult> hits = scan(key, key);
-        return getOneResult.get(hits);
     }
 
 }

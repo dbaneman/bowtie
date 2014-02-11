@@ -1,4 +1,4 @@
-package bowtie.core.api.internal;
+package bowtie.core.api.external;
 
 /**
  * Created with IntelliJ IDEA.

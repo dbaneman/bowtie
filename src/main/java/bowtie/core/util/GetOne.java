@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class GetOne<T> {
 
-    public T get(Iterable<T> iterable) {
+    public T apply(Iterable<T> iterable) {
         final Iterator<T> iterator = iterable.iterator();
         final T next = iterator.next();
         if (iterator.hasNext()) {

@@ -3,9 +3,10 @@ package bowtie.core.api.external;
 /**
  * Created with IntelliJ IDEA.
  * User: dan
- * Date: 1/27/14
- * Time: 8:45 PM
+ * Date: 2/10/14
+ * Time: 10:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITable extends ITableReader, ITableWriter {
+public interface IConfBacked {
+    public IConf getConf();
 }

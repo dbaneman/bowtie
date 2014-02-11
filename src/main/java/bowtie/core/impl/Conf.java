@@ -1,6 +1,6 @@
 package bowtie.core.impl;
 
-import bowtie.core.api.internal.IConf;
+import bowtie.core.api.external.IConf;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

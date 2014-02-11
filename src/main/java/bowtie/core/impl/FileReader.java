@@ -1,7 +1,7 @@
 package bowtie.core.impl;
 
 import bowtie.core.api.external.IResult;
-import bowtie.core.api.internal.IConf;
+import bowtie.core.api.external.IConf;
 import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.api.internal.IFileReader;
 import bowtie.core.util.ByteUtils;
