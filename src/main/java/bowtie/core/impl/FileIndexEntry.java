@@ -1,4 +1,6 @@
-package bowtie.core;
+package bowtie.core.impl;
+
+import bowtie.core.api.internal.IFileIndexEntry;
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,5 +1,11 @@
-package bowtie.core;
+package bowtie.core.impl;
 
+import bowtie.core.api.external.IResult;
+import bowtie.core.api.external.ITable;
+import bowtie.core.api.internal.IConf;
+import bowtie.core.api.internal.IFileIndex;
+import bowtie.core.api.internal.IFileIndexEntry;
+import bowtie.core.util.ByteUtils;
 import com.eaio.uuid.UUID;
 
 import java.io.FileOutputStream;

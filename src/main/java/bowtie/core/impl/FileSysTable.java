@@ -1,4 +1,13 @@
-package bowtie.core;
+package bowtie.core.impl;
+
+import bowtie.core.api.external.IResult;
+import bowtie.core.api.internal.IConf;
+import bowtie.core.api.internal.IFileIndex;
+import bowtie.core.api.internal.ITableReader;
+import bowtie.core.util.ByteUtils;
+import bowtie.core.util.ChainedIterable;
+import bowtie.core.util.GetOne;
+import bowtie.core.util.ReadAheadIterator;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

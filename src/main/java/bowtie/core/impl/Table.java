@@ -1,4 +1,11 @@
-package bowtie.core;
+package bowtie.core.impl;
+
+import bowtie.core.api.external.IResult;
+import bowtie.core.api.external.ITable;
+import bowtie.core.api.internal.IConf;
+import bowtie.core.api.internal.IFileIndex;
+import bowtie.core.api.internal.ITableReader;
+import bowtie.core.util.ChainedIterable;
 
 import java.io.IOException;
 
@@ -36,12 +43,12 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public Iterable<IResult> scan(final byte[] inclStart, final byte[] exclStop) {
+    public Iterable<IResult> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
         return new ChainedIterable<IResult>(memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
     }
 
     @Override
-    public IResult get(final byte[] key) {
+    public IResult get(final byte[] key) throws IOException {
         final IResult memVal = memTable.get(key);
         return memVal != null ? memVal : fsTable.get(key);
     }

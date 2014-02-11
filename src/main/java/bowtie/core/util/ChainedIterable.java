@@ -1,4 +1,4 @@
-package bowtie.core;
+package bowtie.core.util;
 
 import java.util.Arrays;
 import java.util.Iterator;

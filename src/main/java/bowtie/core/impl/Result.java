@@ -1,4 +1,6 @@
-package bowtie.core;
+package bowtie.core.impl;
+
+import bowtie.core.api.external.IResult;
 
 /**
  * Created with IntelliJ IDEA.

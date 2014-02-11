@@ -1,4 +1,6 @@
-package bowtie.core;
+package bowtie.core.api.external;
+
+import bowtie.core.api.internal.ITableReader;
 
 import java.io.IOException;
 
