@@ -20,13 +20,12 @@ public class Table implements ITable, ITableReader {
     private final IConf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
-    private final IFileIndex fileIndex;
 
     public Table(final IConf conf) {
         this.conf = conf;
-        fileIndex = new FileIndex();
+        IFileIndex fileIndex = new FileIndex();
         memTable = new MemTable(conf, fileIndex);
-        fsTable = new FileSysTable(conf, fileIndex);
+        fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex));
     }
 
     @Override
@@ -52,4 +51,5 @@ public class Table implements ITable, ITableReader {
         final IResult memVal = memTable.get(key);
         return memVal != null ? memVal : fsTable.get(key);
     }
+
 }

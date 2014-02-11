@@ -7,11 +7,10 @@ import java.io.IOException;
 /**
  * Created with IntelliJ IDEA.
  * User: dan
- * Date: 1/27/14
- * Time: 9:14 PM
+ * Date: 2/10/14
+ * Time: 10:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableReader extends IConfBacked {
-    Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException;
-    IResult get(byte[] key) throws IOException;
+public interface IFileReader extends IConfBacked {
+    Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, String possibleHit) throws IOException;
 }
