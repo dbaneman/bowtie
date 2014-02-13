@@ -1,5 +1,7 @@
 package bowtie.core.api.internal;
 
+import java.util.NavigableMap;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dan
@@ -15,4 +17,5 @@ public interface IFileIndexEntry {
     byte[] getStartKey();
     byte[] getEndKey();
     String getFileName();
+    NavigableMap<byte[], Long> getKeyPositions();
 }

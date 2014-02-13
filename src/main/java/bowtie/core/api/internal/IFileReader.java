@@ -13,6 +13,6 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public interface IFileReader extends IConfBacked {
-    Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, String possibleHit) throws IOException;
-    IResult getInFile(byte[] key, String possibleHit) throws IOException;
+    Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, IFileIndexEntry possibleHit) throws IOException;
+    IResult getInFile(byte[] key, IFileIndexEntry possibleHit) throws IOException;
 }

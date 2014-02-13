@@ -3,6 +3,7 @@ package bowtie.core.impl;
 import bowtie.core.api.external.IConf;
 import bowtie.core.api.external.IResult;
 import bowtie.core.api.internal.IFileIndex;
+import bowtie.core.api.internal.IFileIndexEntry;
 import bowtie.core.api.internal.IFileReader;
 import bowtie.core.api.internal.IFileSysTable;
 import bowtie.core.util.ChainedIterable;
@@ -37,7 +38,7 @@ public class FileSysTable implements IFileSysTable {
     @Override
     public Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException {
         List<Iterable<IResult>> possibleHitIterators = new ArrayList<Iterable<IResult>>();
-        for (String possibleHit : fileIndex.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
+        for (IFileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
             possibleHitIterators.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
         }
         return new ChainedIterable<IResult>(possibleHitIterators);
@@ -46,7 +47,7 @@ public class FileSysTable implements IFileSysTable {
     @Override
     public IResult get(byte[] key) throws IOException {
         IResult hit = null;
-        for (String possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
+        for (IFileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
             if (hit==null) {
                 hit = fileReader.getInFile(key, possibleHit);
             } else {

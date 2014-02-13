@@ -13,10 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,8 +23,8 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class MemTable implements IMemTable {
-    private SortedMap<byte[], byte[]> map;
-    private SortedMap<byte[], byte[]> mapCurrentlyFlushing;
+    private NavigableMap<byte[], byte[]> map;
+    private NavigableMap<byte[], byte[]> mapCurrentlyFlushing;
     private final IConf conf;
     private final IFileIndex fileIndex;
     private long size;
@@ -39,7 +36,7 @@ public class MemTable implements IMemTable {
         size = 0;
     }
 
-    private static SortedMap<byte[], byte[]> newMap() {
+    private static NavigableMap<byte[], byte[]> newMap() {
         return new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
     }
 

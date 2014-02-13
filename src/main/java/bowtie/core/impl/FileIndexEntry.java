@@ -2,10 +2,8 @@ package bowtie.core.impl;
 
 import bowtie.core.api.internal.IFileIndexEntry;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,10 +16,10 @@ public class FileIndexEntry implements IFileIndexEntry {
     private byte[] startKey;
     private byte[] endKey;
     private String fileName;
-    private final List<Map.Entry<byte[], Long>> keyPositions;
+    private final NavigableMap<byte[], Long> keyPositions;
 
     public FileIndexEntry() {
-        this.keyPositions = new ArrayList<Map.Entry<byte[], Long>>();
+        this.keyPositions = new TreeMap<byte[], Long>();
     }
 
     @Override
@@ -41,7 +39,7 @@ public class FileIndexEntry implements IFileIndexEntry {
 
     @Override
     public void addIndexedKey(byte[] key, long position) {
-        keyPositions.add(new AbstractMap.SimpleEntry<byte[], Long>(key, position));
+        keyPositions.put(key, position);
     }
 
     @Override
@@ -59,7 +57,8 @@ public class FileIndexEntry implements IFileIndexEntry {
         return fileName;
     }
 
-    public List<Map.Entry<byte[], Long>> getKeyPositions() {
+    @Override
+    public NavigableMap<byte[], Long> getKeyPositions() {
         return keyPositions;
     }
 

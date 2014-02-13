@@ -1,5 +1,4 @@
 Local:
-- implement file index in memory
 - clean up conf
 - unit tests
 - log everything before writing it to memory

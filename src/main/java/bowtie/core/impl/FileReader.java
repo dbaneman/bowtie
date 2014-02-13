@@ -3,6 +3,7 @@ package bowtie.core.impl;
 import bowtie.core.api.external.IResult;
 import bowtie.core.api.external.IConf;
 import bowtie.core.api.internal.IFileIndex;
+import bowtie.core.api.internal.IFileIndexEntry;
 import bowtie.core.api.internal.IFileReader;
 import bowtie.core.util.ByteUtils;
 import bowtie.core.util.GetOne;
@@ -31,14 +32,14 @@ public class FileReader implements IFileReader {
     }
 
     @Override
-    public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, String possibleHit) throws IOException {
-        long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart);
-        RandomAccessFile file = new RandomAccessFile(getConf().getString(Conf.DATA_DIR) + possibleHit, "r");
+    public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, IFileIndexEntry possibleHit) throws IOException {
+        long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
+        RandomAccessFile file = new RandomAccessFile(getConf().getString(Conf.DATA_DIR) + possibleHit.getFileName(), "r");
         return new ScanIterable(file, position, inclStart, exclStop);
     }
 
     @Override
-    public IResult getInFile(byte[] key, String possibleHit) throws IOException {
+    public IResult getInFile(byte[] key, IFileIndexEntry possibleHit) throws IOException {
         return getOneResult.apply(scanInFile(key, null, possibleHit));
     }
 
