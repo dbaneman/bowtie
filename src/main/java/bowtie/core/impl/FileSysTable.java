@@ -6,7 +6,6 @@ import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.api.internal.IFileReader;
 import bowtie.core.api.internal.IFileSysTable;
 import bowtie.core.util.ChainedIterable;
-import bowtie.core.util.GetOne;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,13 +22,11 @@ public class FileSysTable implements IFileSysTable {
     private final IConf conf;
     private final IFileIndex fileIndex;
     private final IFileReader fileReader;
-    private final GetOne<IResult> getOneResult;
 
     public FileSysTable(IConf conf, IFileIndex fileIndex, IFileReader fileReader) {
         this.conf = conf;
         this.fileIndex = fileIndex;
         this.fileReader = fileReader;
-        getOneResult = new GetOne<IResult>();
     }
 
     @Override
@@ -44,6 +41,20 @@ public class FileSysTable implements IFileSysTable {
             possibleHitIterators.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
         }
         return new ChainedIterable<IResult>(possibleHitIterators);
+    }
+
+    @Override
+    public IResult get(byte[] key) throws IOException {
+        IResult hit = null;
+        for (String possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
+            if (hit==null) {
+                hit = fileReader.getInFile(key, possibleHit);
+            } else {
+                // TODO: implement this
+                throw new RuntimeException("We don't yet support multiple values for the same key! Should pick latest based on timestamp or something.");
+            }
+        }
+        return hit!=null ? hit : new Result(key, null);
     }
 
 }

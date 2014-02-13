@@ -9,8 +9,7 @@ import java.io.IOException;
  * Time: 9:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableReader extends ITableReaderCore {
-    Iterable<IResult> get(byte[] key) throws IOException;
-    IResult getOne(byte[] key) throws IOException;
-    IResult scanOne(byte[] inclStart, byte[] exclStop) throws IOException;
+public interface ITableReader extends IConfBacked {
+    Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException;
+    IResult get(byte[] key) throws IOException;
 }

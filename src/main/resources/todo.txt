@@ -1,0 +1,12 @@
+Local:
+- implement file index in memory
+- clean up conf
+- unit tests
+- log everything before writing it to memory
+- clear log after flush to disk
+- shutdown should flush memstore
+- implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
+- implement update and delete
+
+ Distributed:
+ - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)

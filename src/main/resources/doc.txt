@@ -1,7 +1,0 @@
-- have a tree of sequentially organized files
-- whenever we get a new entry, we append to the end of a file, if possible (i.e. if it would still be ordered)
-- if not possible (i.e. if it's supposed to go somewhere in the middle of an existing file), we split the file and
-    append to the end of the first-half-file
-- periodically we can simply append files to each other.
---> wouldn't this result in just a huge number of files? we could periodically combine them...but then we'd just be splitting
-    them again pretty soon. maybe that's fine if we want to optimize for reads?

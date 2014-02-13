@@ -14,4 +14,5 @@ import java.io.IOException;
  */
 public interface IFileReader extends IConfBacked {
     Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, String possibleHit) throws IOException;
+    IResult getInFile(byte[] key, String possibleHit) throws IOException;
 }

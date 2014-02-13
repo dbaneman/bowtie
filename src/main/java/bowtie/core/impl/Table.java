@@ -37,17 +37,11 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public void append(byte[] key, byte[] value) throws IOException {
-        memTable.append(key, value);
+    public void put(byte[] key, byte[] value) throws IOException {
+        memTable.put(key, value);
         if (memTable.isFull()) {
             memTable.flush();
         }
-    }
-
-    @Override
-    public void put(final byte[] key, final byte[] value) throws IOException {
-        delete(key);
-        append(key, value);
     }
 
     @Override
@@ -61,21 +55,10 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public Iterable<IResult>get(final byte[] key) throws IOException {
-        return scan(key, null);
-    }
-
-    @Override
-    public IResult getOne(byte[] key) throws IOException {
-        final Iterable<IResult> hits = get(key);
-        return getOneResult.apply(hits);
-
-    }
-
-    @Override
-    public IResult scanOne(byte[] inclStart, byte[] exclStop) throws IOException {
-        final Iterable<IResult> hits = scan(inclStart, exclStop);
-        return getOneResult.apply(hits);
+    public IResult get(byte[] key) throws IOException {
+        // TODO: this is only okay if we're certain that memVal is more recent
+        final IResult memVal = memTable.get(key);
+        return memVal != null ? memVal : fsTable.get(key);
     }
 
 }

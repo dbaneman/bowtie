@@ -18,12 +18,17 @@ public class FileIndex implements IFileIndex {
     }
 
     @Override
+    public Iterable<String> getFilesPossiblyContainingKey(byte[] key) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public Iterable<String> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public long getClosestPositionBeforeOrAtKeyRange(byte[] inclStart) {
+    public long getClosestPositionBeforeOrAtKey(byte[] inclStart) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

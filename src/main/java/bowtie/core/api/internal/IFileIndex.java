@@ -10,6 +10,7 @@ package bowtie.core.api.internal;
  */
 public interface IFileIndex {
     void addEntry(IFileIndexEntry entry);
+    Iterable<String> getFilesPossiblyContainingKey(byte[] key);
     Iterable<String> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd);
-    long getClosestPositionBeforeOrAtKeyRange(byte[] inclStart);
+    long getClosestPositionBeforeOrAtKey(byte[] inclStart);
 }

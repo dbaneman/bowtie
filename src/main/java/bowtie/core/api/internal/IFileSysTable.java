@@ -1,6 +1,6 @@
 package bowtie.core.api.internal;
 
-import bowtie.core.api.external.ITableReaderCore;
+import bowtie.core.api.external.ITableReader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,5 +9,5 @@ import bowtie.core.api.external.ITableReaderCore;
  * Time: 11:06 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface IFileSysTable extends ITableReaderCore {
+public interface IFileSysTable extends ITableReader {
 }

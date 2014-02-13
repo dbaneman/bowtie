@@ -9,6 +9,7 @@ import java.io.IOException;
  * Time: 11:01 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableWriter extends ITableWriterCore {
+public interface ITableWriter extends IConfBacked {
     void put(byte[] key, byte[] value) throws IOException;
+    void delete(byte[] key) throws IOException;
 }
