@@ -1,6 +1,7 @@
 package bowtie.core.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class ChainedIterable<T> implements Iterable<T> {
         return new ChainedIterator<T>(iterables);
     }
 
-    public static class ChainedIterator<T> implements Iterator<T>  {
+    public static class ChainedIterator<T> extends ReadAheadIterator<T> implements Iterator<T>  {
         private final List<Iterable<T>> iterables;
         int currentIteratorIndex;
         Iterator<T> currentIterator;
@@ -35,22 +36,18 @@ public class ChainedIterable<T> implements Iterable<T> {
         ChainedIterator(final List<Iterable<T>> iterables) {
             this.iterables = iterables;
             currentIteratorIndex = -1;
-            advanceToNextIterator();
+            currentIterator = Collections.emptyIterator();
         }
 
         @Override
-        public boolean hasNext() {
-            return currentIterator.hasNext() || (advanceToNextIterator() && currentIterator.hasNext());
-        }
-
-        @Override
-        public T next() {
-            return currentIterator.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
+        protected T readAhead() throws Exception {
+            if (currentIterator.hasNext()) {
+                return currentIterator.next();
+            }
+            if (advanceToNextIterator()) {
+                return readAhead();
+            }
+            return null;
         }
 
         boolean advanceToNextIterator() {
