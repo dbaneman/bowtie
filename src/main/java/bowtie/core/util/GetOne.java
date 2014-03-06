@@ -1,5 +1,7 @@
 package bowtie.core.util;
 
+import bowtie.core.exceptions.MoreThanOneException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -18,7 +20,7 @@ public class GetOne<T> {
         final Iterator<T> iterator = iterable.iterator();
         final T next = iterator.next();
         if (iterator.hasNext()) {
-            throw new RuntimeException("Expected one hit but got " + toCollection(iterable).size() + ".");
+            throw new MoreThanOneException(toCollection(iterable).size());
         }
         return next;
     }

@@ -16,10 +16,10 @@ import java.util.Map;
  */
 public class Conf implements IConf {
 
-    public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-size-in-mb";
-    public static final String DATA_DIR = "bowtie.data-dir";
+    public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-size-in-bytes";
     public static final String HOME_DIR = "bowtie.home-dir";
     public static final String BYTES_BETWEEN_INDEXED_KEYS = "bowtie.bytes-between-indexed-keys";
+    public static final String TABLE_NAME = "bowtie.table-name";
 
     private final Config config;
     private final Map<String, Object> parameterCache;
@@ -34,7 +34,12 @@ public class Conf implements IConf {
     }
 
     public Conf() {
-        this((Config) null);
+        this(ConfigFactory.load());
+    }
+
+    @Override
+    public String getDataDir() {
+        return getString(HOME_DIR) + getString(TABLE_NAME) + "/";
     }
 
     @Override
@@ -53,6 +58,12 @@ public class Conf implements IConf {
     public Long getLong(String parameter) {
         cacheIfNotCached(parameter);
         return (Long) parameterCache.get(parameter);
+    }
+
+    @Override
+    public Boolean getBoolean(String parameter) {
+        cacheIfNotCached(parameter);
+        return (Boolean) parameterCache.get(parameter);
     }
 
     private void cacheIfNotCached(String parameter) {

@@ -12,4 +12,5 @@ import java.io.IOException;
 public interface ITableWriter extends IConfBacked {
     void put(byte[] key, byte[] value) throws IOException;
     void delete(byte[] key) throws IOException;
+    void clear() throws IOException;
 }

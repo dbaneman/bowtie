@@ -11,4 +11,6 @@ public interface IConf {
     String getString(String parameter);
     Integer getInt(String parameter);
     Long getLong(String parameter);
+    Boolean getBoolean(String parameter);
+    String getDataDir();
 }

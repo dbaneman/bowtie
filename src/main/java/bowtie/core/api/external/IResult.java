@@ -10,4 +10,5 @@ package bowtie.core.api.external;
 public interface IResult {
     byte[] getKey();
     byte[] getValue();
+    boolean noVal();
 }

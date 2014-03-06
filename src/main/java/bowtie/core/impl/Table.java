@@ -1,13 +1,13 @@
 package bowtie.core.impl;
 
+import bowtie.core.api.external.IConf;
 import bowtie.core.api.external.IResult;
 import bowtie.core.api.external.ITable;
-import bowtie.core.api.external.IConf;
-import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.api.external.ITableReader;
+import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.util.ChainedIterable;
-import bowtie.core.util.GetOne;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -21,14 +21,12 @@ public class Table implements ITable, ITableReader {
     private final IConf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
-    private final GetOne<IResult> getOneResult;
 
     public Table(final IConf conf) {
         this.conf = conf;
         IFileIndex fileIndex = new FileIndex();
         memTable = new MemTable(conf, fileIndex);
         fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex));
-        getOneResult = new GetOne<IResult>();
     }
 
     @Override
@@ -47,6 +45,12 @@ public class Table implements ITable, ITableReader {
     @Override
     public void delete(byte[] key) throws IOException {
         memTable.delete(key);
+    }
+
+    @Override
+    public void clear() throws IOException {
+        memTable.clear();
+        new File(getConf().getDataDir()).delete();
     }
 
     @Override

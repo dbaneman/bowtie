@@ -1,7 +1,7 @@
 package bowtie.core.impl;
 
-import bowtie.core.api.external.IResult;
 import bowtie.core.api.external.IConf;
+import bowtie.core.api.external.IResult;
 import bowtie.core.api.internal.IFileIndex;
 import bowtie.core.api.internal.IFileIndexEntry;
 import bowtie.core.api.internal.IFileReader;
@@ -9,8 +9,7 @@ import bowtie.core.util.ByteUtils;
 import bowtie.core.util.GetOne;
 import bowtie.core.util.ReadAheadIterator;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -34,8 +33,8 @@ public class FileReader implements IFileReader {
     @Override
     public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, IFileIndexEntry possibleHit) throws IOException {
         long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
-        RandomAccessFile file = new RandomAccessFile(getConf().getString(Conf.DATA_DIR) + possibleHit.getFileName(), "r");
-        return new ScanIterable(file, position, inclStart, exclStop);
+        String fileLocation = getConf().getDataDir() + possibleHit.getFileName();
+        return new ScanIterable(fileLocation, position, inclStart, exclStop);
     }
 
     @Override
@@ -53,8 +52,8 @@ public class FileReader implements IFileReader {
         private final byte[] inclStart;
         private final byte[] exclStop;
 
-        public ScanIterable(final RandomAccessFile file, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
-            this.file = file;
+        public ScanIterable(final String fileLocation, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
+            this.file = new RandomAccessFile(fileLocation, "r"); // TODO: make this a BufferedInputStream over a FileInputStream? should check performance.
             this.inclStart = inclStart;
             this.exclStop = exclStop;
             file.seek(startPosition);

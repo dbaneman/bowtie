@@ -1,6 +1,5 @@
-package bowtie.core;
+package bowtie.core.util;
 
-import bowtie.core.util.ChainedIterable;
 import junit.framework.Assert;
 import org.junit.Test;
 

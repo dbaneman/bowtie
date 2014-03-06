@@ -96,6 +96,14 @@ public class MemTable implements IMemTable {
     }
 
     @Override
+    public void clear() throws IOException {
+        map.clear();
+        if (mapCurrentlyFlushing != null) {
+            mapCurrentlyFlushing.clear();
+        }
+    }
+
+    @Override
     public boolean isFull() {
         return size >= getConf().getLong(Conf.MAX_MEM_STORE_SIZE);
     }
@@ -110,7 +118,7 @@ public class MemTable implements IMemTable {
         IFileIndexEntry fileIndexEntry = new FileIndexEntry();
         String fileName = new UUID().toString();
         fileIndexEntry.setFileName(fileName);
-        OutputStream fileOutputStream = new FileOutputStream(getConf().getString(Conf.DATA_DIR) + "/" + fileName);
+        OutputStream fileOutputStream = new FileOutputStream(getConf().getDataDir() + "/" + fileName);
         boolean first = true;
         long currentSize = 0;
         for (Map.Entry<byte[], byte[]> entry : mapCurrentlyFlushing.entrySet()) {

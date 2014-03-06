@@ -40,7 +40,7 @@ public class ChainedIterable<T> implements Iterable<T> {
 
         @Override
         public boolean hasNext() {
-            return currentIterator.hasNext() || advanceToNextIterator() && currentIterator.hasNext();
+            return currentIterator.hasNext() || (advanceToNextIterator() && currentIterator.hasNext());
         }
 
         @Override

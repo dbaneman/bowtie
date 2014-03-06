@@ -10,7 +10,7 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ReadAheadIterator<T> implements Iterator<T> {
-    private boolean isFirstIteration = false;
+    private boolean isFirstIteration = true;
     private boolean alreadyReadAhead = false;
     private T next;
 
@@ -24,24 +24,24 @@ public abstract class ReadAheadIterator<T> implements Iterator<T> {
 
     @Override
     public final boolean hasNext() {
-        if (isFirstIteration) {
-            onStart();
-            isFirstIteration = false;
-        }
         if (!alreadyReadAhead) {
             next = tryReadAhead();
             alreadyReadAhead = true;
         }
-        boolean ret = next!=null;
-        if (!ret) {
-            onEnd();
-        }
-        return ret;
+        return next!=null;
     }
 
     private T tryReadAhead() {
         try {
-            return readAhead();
+            if (isFirstIteration) {
+                onStart();
+                isFirstIteration = false;
+            }
+            T ret = readAhead();
+            if (ret == null) {
+                onEnd();
+            }
+            return ret;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
