@@ -1,7 +1,7 @@
 package bowtie.core.impl;
 
 import bowtie.core.api.external.IResult;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Test;
 
@@ -47,7 +47,6 @@ public class TableTest {
         table.put(key0, value);
         table.put(key1, value);
         table.put(key2, value);
-        table.put(key2, value2);
         table.put(key3, value);
         table.put(key4, value);
         results = table.scan(key1, key4).iterator();
@@ -55,8 +54,6 @@ public class TableTest {
         Assert.assertEquals(new Result(key1, value), results.next());
         Assert.assertTrue(results.hasNext());
         Assert.assertEquals(new Result(key2, value), results.next());
-        Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new Result(key2, value2), results.next());
         Assert.assertTrue(results.hasNext());
         Assert.assertEquals(new Result(key3, value), results.next());
         Assert.assertFalse(results.hasNext());
@@ -70,11 +67,10 @@ public class TableTest {
     }
 
     @Test
-    public void testGetMultiple() throws Exception {
+    public void testGetAfterOverwrite() throws Exception {
         table.put(key, value);
         table.put(key, value2);
-        table.get(key);
-        Assert.assertTrue(false); // TODO: what behavior do we expect here?
+        Assert.assertEquals(new Result(key, value2), table.get(key));
     }
 
     @Test

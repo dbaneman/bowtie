@@ -1,11 +1,13 @@
 Local:
 - clean up conf
 - unit tests
-- log everything before writing it to memory
+- log everything before writing it to memory (awesomely, this log can just be the file that will represent the actual data)
 - clear log after flush to disk
 - shutdown should flush memstore
 - implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
 - implement update and delete
+- compaction
+- bloom filters
 
  Distributed:
  - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)
