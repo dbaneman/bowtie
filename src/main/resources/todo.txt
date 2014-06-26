@@ -1,13 +1,17 @@
 Local:
+- implement delete (we can say that value length of -1 means it's deleted. on compaction we can just eliminate that record entirely.)
+- implement update (in-memory, latest value wins; from disk, value with latest file timestamp wins)
+- make sure file index is persisted
+- test basic persistence (restart)
 - clean up conf
-- unit tests
-- log everything before writing it to memory (awesomely, this log can just be the file that will represent the actual data)
-- clear log after flush to disk
-- shutdown should flush memstore
-- implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
-- implement update and delete
+- decide whether we want non-flushed writes to be readable after shutdown. if yes:
+--> log everything before writing it to memory (awesomely, this log can just be the file that will represent the actual data)
+--> clear log after flush to disk
+--> shutdown/close should flush memstore
+--> implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
 - compaction
 - bloom filters
+- add pools for getting tables (may need to think about concurrency issues)
 
  Distributed:
  - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)

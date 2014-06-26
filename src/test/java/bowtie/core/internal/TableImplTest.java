@@ -2,7 +2,6 @@ package bowtie.core.internal;
 
 import bowtie.core.Result;
 import org.junit.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,6 +93,11 @@ public class TableImplTest {
     @Test
     public void testScanAfterFlush() throws Exception {
         Assert.assertFalse("implement me!", true);
+    }
+
+    @Test
+    public void testGetNullValue() throws Exception {
+        Assert.assertTrue(table.get(key).noVal());
     }
 
     @Test

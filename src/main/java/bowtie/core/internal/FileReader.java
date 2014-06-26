@@ -5,8 +5,8 @@ import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.GetOne;
 import bowtie.core.internal.util.ReadAheadIterator;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 /**
@@ -44,15 +44,15 @@ public class FileReader {
     }
 
     private static class ScanIterable implements Iterable<Result> {
-        private final RandomAccessFile file;
+        private final InputStream fileInputStream;
         private final byte[] inclStart;
         private final byte[] exclStop;
 
         public ScanIterable(final String fileLocation, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
-            this.file = new RandomAccessFile(fileLocation, "r"); // TODO: make this a BufferedInputStream over a FileInputStream? should check performance.
+            this.fileInputStream = new BufferedInputStream(new FileInputStream(fileLocation));
             this.inclStart = inclStart;
             this.exclStop = exclStop;
-            file.seek(startPosition);
+            fileInputStream.skip(startPosition);
         }
 
         @Override
@@ -63,16 +63,21 @@ public class FileReader {
                 protected Result readAhead() throws Exception {
                     byte[] key;
                     byte[] value;
+                    byte[] length;
                     do {
-                        short keyLength = file.readShort();
+                        length = new byte[2];
+                        fileInputStream.read(length);
+                        short keyLength = ByteBuffer.wrap(length).getShort();
                         if (keyLength == -1) {
                             return null;
                         }
                         key = new byte[keyLength];
-                        file.readFully(key);
-                        short valueLength = file.readShort();
+                        fileInputStream.read(key);
+                        length = new byte[2];
+                        fileInputStream.read(length);
+                        short valueLength = ByteBuffer.wrap(length).getShort();
                         value = new byte[valueLength];
-                        file.readFully(value);
+                        fileInputStream.read(value);
                     } while (ByteUtils.compare(key, inclStart) < 0);
                     if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || (exclStop!=null && ByteUtils.compare(key, exclStop) >= 0)) {
                         return null;
@@ -83,7 +88,7 @@ public class FileReader {
                 @Override
                 protected void onEnd() {
                     try {
-                        file.close();
+                        fileInputStream.close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
