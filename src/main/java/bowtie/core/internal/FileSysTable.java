@@ -32,11 +32,11 @@ public class FileSysTable implements TableReader {
 
     @Override
     public Iterable<Result> scan(byte[] inclStart, byte[] exclStop) throws IOException {
-        List<Iterable<Result>> possibleHitIterators = new ArrayList<Iterable<Result>>();
+        List<Iterable<Result>> possibleHitIterables = new ArrayList<Iterable<Result>>();
         for (FileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
-            possibleHitIterators.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
+            possibleHitIterables.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
         }
-        return new ChainedIterable<Result>(possibleHitIterators);
+        return new ChainedIterable<Result>(possibleHitIterables);
     }
 
     @Override

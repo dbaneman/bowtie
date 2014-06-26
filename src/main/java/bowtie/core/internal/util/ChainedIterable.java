@@ -1,7 +1,8 @@
 package bowtie.core.internal.util;
 
+import org.apache.commons.collections.iterators.IteratorChain;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,39 +26,11 @@ public class ChainedIterable<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new ChainedIterator<T>(iterables);
+        IteratorChain iteratorChain = new IteratorChain();
+        for (Iterable<T> iterable : iterables) {
+            iteratorChain.addIterator(iterable.iterator());
+        }
+        return iteratorChain;
     }
 
-    public static class ChainedIterator<T> extends ReadAheadIterator<T> implements Iterator<T>  {
-        private final List<Iterable<T>> iterables;
-        int currentIteratorIndex;
-        Iterator<T> currentIterator;
-
-        ChainedIterator(final List<Iterable<T>> iterables) {
-            this.iterables = iterables;
-            currentIteratorIndex = -1;
-            currentIterator = Collections.emptyIterator();
-        }
-
-        @Override
-        protected T readAhead() throws Exception {
-            if (currentIterator.hasNext()) {
-                return currentIterator.next();
-            }
-            if (advanceToNextIterator()) {
-                return readAhead();
-            }
-            return null;
-        }
-
-        boolean advanceToNextIterator() {
-            if (++currentIteratorIndex < iterables.size()) {
-                currentIterator = iterables.get(currentIteratorIndex).iterator();
-                return true;
-            }
-            currentIterator = null;
-            return false;
-        }
-
-    };
 }
