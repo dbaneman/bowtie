@@ -1,7 +1,7 @@
 package bowtie.core.internal;
 
-import bowtie.core.IResult;
-import bowtie.core.ITable;
+import bowtie.core.Result;
+import bowtie.core.Table;
 import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.ChainedIterable;
 
@@ -16,7 +16,7 @@ import java.util.*;
  * Time: 8:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MemTable implements ITable {
+public class MemTable implements Table {
     private NavigableMap<byte[], byte[]> map;
     private NavigableMap<byte[], byte[]> mapCurrentlyFlushing;
     private final Conf conf;
@@ -39,35 +39,35 @@ public class MemTable implements ITable {
     }
 
     @Override
-    public Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) {
+    public Iterable<Result> scan(byte[] inclStart, byte[] exclStop) {
         return mapCurrentlyFlushing!=null
-                ? new ChainedIterable<IResult>(scan(inclStart, exclStop, map), scan(inclStart, exclStop, mapCurrentlyFlushing))
+                ? new ChainedIterable<Result>(scan(inclStart, exclStop, map), scan(inclStart, exclStop, mapCurrentlyFlushing))
                 : scan(inclStart, exclStop, map);
     }
 
     @Override
-    public IResult get(byte[] key) throws IOException {
+    public Result get(byte[] key) throws IOException {
         if (key == null) {
             throw new NullPointerException("Attempted to get a null key.");
         }
-        return new Result(key, map.get(key));
+        return new ResultImpl(key, map.get(key));
     }
 
-    private static Iterable<IResult> scan(byte[] inclStart, byte[] exclStop, SortedMap<byte[], byte[]> map) {
+    private static Iterable<Result> scan(byte[] inclStart, byte[] exclStop, SortedMap<byte[], byte[]> map) {
         final Iterator<Map.Entry<byte[], byte[]>> subMapIterator = map.subMap(inclStart, exclStop).entrySet().iterator();
-        return new Iterable<IResult>() {
+        return new Iterable<Result>() {
             @Override
-            public Iterator<IResult> iterator() {
-                return new Iterator<IResult>() {
+            public Iterator<Result> iterator() {
+                return new Iterator<Result>() {
                     @Override
                     public boolean hasNext() {
                         return subMapIterator.hasNext();
                     }
 
                     @Override
-                    public IResult next() {
+                    public Result next() {
                         final Map.Entry<byte[], byte[]> next = subMapIterator.next();
-                        return new Result(next.getKey(), next.getValue());
+                        return new ResultImpl(next.getKey(), next.getValue());
                     }
 
                     @Override

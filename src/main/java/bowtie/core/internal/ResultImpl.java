@@ -1,6 +1,6 @@
 package bowtie.core.internal;
 
-import bowtie.core.IResult;
+import bowtie.core.Result;
 
 import java.util.Arrays;
 
@@ -11,11 +11,11 @@ import java.util.Arrays;
  * Time: 10:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Result implements IResult {
+public class ResultImpl implements Result {
     private final byte[] key;
     private final byte[] value;
 
-    public Result(final byte[] key, final byte[] value) {
+    public ResultImpl(final byte[] key, final byte[] value) {
         this.key = key;
         this.value = value;
     }
@@ -39,7 +39,7 @@ public class Result implements IResult {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Result result = (Result) o;
+        ResultImpl result = (ResultImpl) o;
         return Arrays.equals(key, result.key) && Arrays.equals(value, result.value);
     }
 
@@ -52,7 +52,7 @@ public class Result implements IResult {
 
     @Override
     public String toString() {
-        return "Result{" +
+        return "ResultImpl{" +
                 "key=" + Arrays.toString(key) +
                 ", value=" + Arrays.toString(value) +
                 '}';

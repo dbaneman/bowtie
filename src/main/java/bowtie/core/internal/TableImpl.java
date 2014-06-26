@@ -1,8 +1,8 @@
 package bowtie.core.internal;
 
-import bowtie.core.IResult;
-import bowtie.core.ITable;
-import bowtie.core.ITableReader;
+import bowtie.core.Result;
+import bowtie.core.Table;
+import bowtie.core.TableReader;
 import bowtie.core.internal.util.ChainedIterable;
 import org.apache.commons.io.FileUtils;
 
@@ -16,12 +16,12 @@ import java.io.IOException;
  * Time: 8:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Table implements ITable, ITableReader {
+public class TableImpl implements Table, TableReader {
     private final Conf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
 
-    public Table(final Conf conf) {
+    public TableImpl(final Conf conf) {
         this.conf = conf;
         FileIndex fileIndex = new FileIndex();
         memTable = new MemTable(conf, fileIndex);
@@ -52,14 +52,14 @@ public class Table implements ITable, ITableReader {
     }
 
     @Override
-    public Iterable<IResult> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
-        return new ChainedIterable<IResult>(memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
+    public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
+        return new ChainedIterable<Result>(memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
     }
 
     @Override
-    public IResult get(byte[] key) throws IOException {
+    public Result get(byte[] key) throws IOException {
         // TODO: this is only okay if we're certain that memVal is more recent
-        final IResult memVal = memTable.get(key);
+        final Result memVal = memTable.get(key);
         return memVal != null ? memVal : fsTable.get(key);
     }
 

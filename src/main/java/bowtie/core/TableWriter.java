@@ -9,7 +9,7 @@ import java.io.IOException;
  * Time: 11:01 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableWriter {
+public interface TableWriter {
     /**
      * Indexes the given key/value pair. If the key is already present, the existing value gets overwritten.
      */

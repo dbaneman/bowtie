@@ -1,6 +1,6 @@
 package bowtie.core.internal;
 
-import bowtie.core.IResult;
+import bowtie.core.Result;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Test;
@@ -14,8 +14,8 @@ import java.util.Iterator;
  * Time: 10:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TableTest {
-    Table table = new Table(new Conf());
+public class TableImplTest {
+    TableImpl table = new TableImpl(new Conf());
     byte[] key = new byte[]{1};
     byte[] value = new byte[]{2};
     byte[] value2 = new byte[]{10};
@@ -24,7 +24,7 @@ public class TableTest {
     public void testPut() throws Exception {
         Assert.assertTrue(table.get(key).noVal());
         table.put(key, value);
-        Assert.assertEquals(new Result(key, value), table.get(key));
+        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class TableTest {
         byte[] key2 = new byte[]{2};
         byte[] key3 = new byte[]{3};
         byte[] key4 = new byte[]{4};
-        Iterator<IResult> results = table.scan(key1, key4).iterator();
+        Iterator<Result> results = table.scan(key1, key4).iterator();
         Assert.assertFalse(results.hasNext());
         table.put(key0, value);
         table.put(key1, value);
@@ -51,11 +51,11 @@ public class TableTest {
         table.put(key4, value);
         results = table.scan(key1, key4).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new Result(key1, value), results.next());
+        Assert.assertEquals(new ResultImpl(key1, value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new Result(key2, value), results.next());
+        Assert.assertEquals(new ResultImpl(key2, value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new Result(key3, value), results.next());
+        Assert.assertEquals(new ResultImpl(key3, value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -63,14 +63,14 @@ public class TableTest {
     public void testGetSingle() throws Exception {
         Assert.assertTrue(table.get(key).noVal());
         table.put(key, value);
-        Assert.assertEquals(new Result(key, value), table.get(key));
+        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
     }
 
     @Test
     public void testGetAfterOverwrite() throws Exception {
         table.put(key, value);
         table.put(key, value2);
-        Assert.assertEquals(new Result(key, value2), table.get(key));
+        Assert.assertEquals(new ResultImpl(key, value2), table.get(key));
     }
 
     @Test

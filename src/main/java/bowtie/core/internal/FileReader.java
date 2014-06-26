@@ -1,6 +1,6 @@
 package bowtie.core.internal;
 
-import bowtie.core.IResult;
+import bowtie.core.Result;
 import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.GetOne;
 import bowtie.core.internal.util.ReadAheadIterator;
@@ -19,21 +19,21 @@ import java.util.Iterator;
 public class FileReader {
     private final Conf conf;
     private final FileIndex fileIndex;
-    private final GetOne<IResult> getOneResult;
+    private final GetOne<Result> getOneResult;
 
     public FileReader(Conf conf, FileIndex fileIndex) {
         this.conf = conf;
         this.fileIndex = fileIndex;
-        getOneResult = new GetOne<IResult>();
+        getOneResult = new GetOne<Result>();
     }
 
-    public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
+    public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
         long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
         String fileLocation = getConf().getDataDir() + possibleHit.getFileName();
         return new ScanIterable(fileLocation, position, inclStart, exclStop);
     }
 
-    public IResult getInFile(byte[] key, FileIndexEntry possibleHit) throws IOException {
+    public Result getInFile(byte[] key, FileIndexEntry possibleHit) throws IOException {
         return getOneResult.apply(scanInFile(key, null, possibleHit));
     }
 
@@ -41,7 +41,7 @@ public class FileReader {
         return conf;
     }
 
-    private static class ScanIterable implements Iterable<IResult> {
+    private static class ScanIterable implements Iterable<Result> {
         private final RandomAccessFile file;
         private final byte[] inclStart;
         private final byte[] exclStop;
@@ -54,11 +54,11 @@ public class FileReader {
         }
 
         @Override
-        public Iterator<IResult> iterator() {
-            return new ReadAheadIterator<IResult>() {
+        public Iterator<Result> iterator() {
+            return new ReadAheadIterator<Result>() {
 
                 @Override
-                protected IResult readAhead() throws Exception {
+                protected Result readAhead() throws Exception {
                     byte[] key;
                     byte[] value;
                     do {
@@ -72,7 +72,7 @@ public class FileReader {
                     if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || ByteUtils.compare(key, exclStop) >= 0) {
                         return null;
                     }
-                    return new Result(key, value);
+                    return new ResultImpl(key, value);
                 }
 
                 @Override
