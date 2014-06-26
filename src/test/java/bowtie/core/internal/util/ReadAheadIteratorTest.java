@@ -1,4 +1,4 @@
-package bowtie.core.util;
+package bowtie.core.internal.util;
 
 import org.junit.Assert;
 import org.junit.Before;

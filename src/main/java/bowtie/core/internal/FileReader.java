@@ -1,15 +1,12 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IConf;
-import bowtie.core.api.external.IResult;
-import bowtie.core.api.internal.IFileIndex;
-import bowtie.core.api.internal.IFileIndexEntry;
-import bowtie.core.api.internal.IFileReader;
-import bowtie.core.util.ByteUtils;
-import bowtie.core.util.GetOne;
-import bowtie.core.util.ReadAheadIterator;
+import bowtie.core.IResult;
+import bowtie.core.internal.util.ByteUtils;
+import bowtie.core.internal.util.GetOne;
+import bowtie.core.internal.util.ReadAheadIterator;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Iterator;
 
 /**
@@ -19,31 +16,28 @@ import java.util.Iterator;
  * Time: 10:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileReader implements IFileReader {
-    private final IConf conf;
-    private final IFileIndex fileIndex;
+public class FileReader {
+    private final Conf conf;
+    private final FileIndex fileIndex;
     private final GetOne<IResult> getOneResult;
 
-    public FileReader(IConf conf, IFileIndex fileIndex) {
+    public FileReader(Conf conf, FileIndex fileIndex) {
         this.conf = conf;
         this.fileIndex = fileIndex;
         getOneResult = new GetOne<IResult>();
     }
 
-    @Override
-    public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, IFileIndexEntry possibleHit) throws IOException {
+    public Iterable<IResult> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
         long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
         String fileLocation = getConf().getDataDir() + possibleHit.getFileName();
         return new ScanIterable(fileLocation, position, inclStart, exclStop);
     }
 
-    @Override
-    public IResult getInFile(byte[] key, IFileIndexEntry possibleHit) throws IOException {
+    public IResult getInFile(byte[] key, FileIndexEntry possibleHit) throws IOException {
         return getOneResult.apply(scanInFile(key, null, possibleHit));
     }
 
-    @Override
-    public IConf getConf() {
+    public Conf getConf() {
         return conf;
     }
 

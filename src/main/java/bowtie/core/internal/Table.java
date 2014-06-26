@@ -1,11 +1,10 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IConf;
-import bowtie.core.api.external.IResult;
-import bowtie.core.api.external.ITable;
-import bowtie.core.api.external.ITableReader;
-import bowtie.core.api.internal.IFileIndex;
-import bowtie.core.util.ChainedIterable;
+import bowtie.core.IResult;
+import bowtie.core.ITable;
+import bowtie.core.ITableReader;
+import bowtie.core.internal.util.ChainedIterable;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,19 +17,18 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class Table implements ITable, ITableReader {
-    private final IConf conf;
+    private final Conf conf;
     private final MemTable memTable;
     private final FileSysTable fsTable;
 
-    public Table(final IConf conf) {
+    public Table(final Conf conf) {
         this.conf = conf;
-        IFileIndex fileIndex = new FileIndex();
+        FileIndex fileIndex = new FileIndex();
         memTable = new MemTable(conf, fileIndex);
         fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex));
     }
 
-    @Override
-    public IConf getConf() {
+    public Conf getConf() {
         return conf;
     }
 
@@ -50,7 +48,7 @@ public class Table implements ITable, ITableReader {
     @Override
     public void clear() throws IOException {
         memTable.clear();
-        new File(getConf().getDataDir()).delete();
+        FileUtils.deleteDirectory(new File(getConf().getDataDir()));
     }
 
     @Override

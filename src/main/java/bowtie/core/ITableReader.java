@@ -1,4 +1,4 @@
-package bowtie.core.api.external;
+package bowtie.core;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
  * Time: 9:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableReader extends IConfBacked {
+public interface ITableReader {
     Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException;
     IResult get(byte[] key) throws IOException;
 }

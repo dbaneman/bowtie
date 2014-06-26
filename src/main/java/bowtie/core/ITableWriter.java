@@ -1,4 +1,4 @@
-package bowtie.core.api.external;
+package bowtie.core;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
  * Time: 11:01 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ITableWriter extends IConfBacked {
+public interface ITableWriter {
     /**
      * Indexes the given key/value pair. If the key is already present, the existing value gets overwritten.
      */

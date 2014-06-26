@@ -1,4 +1,4 @@
-package bowtie.core.util;
+package bowtie.core.internal.util;
 
 import junit.framework.Assert;
 import org.junit.Test;

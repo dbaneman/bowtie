@@ -1,12 +1,8 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IConf;
-import bowtie.core.api.external.IResult;
-import bowtie.core.api.internal.IFileIndex;
-import bowtie.core.api.internal.IFileIndexEntry;
-import bowtie.core.api.internal.IFileReader;
-import bowtie.core.api.internal.IFileSysTable;
-import bowtie.core.util.ChainedIterable;
+import bowtie.core.IResult;
+import bowtie.core.ITableReader;
+import bowtie.core.internal.util.ChainedIterable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,26 +15,25 @@ import java.util.List;
  * Time: 9:02 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileSysTable implements IFileSysTable {
-    private final IConf conf;
-    private final IFileIndex fileIndex;
-    private final IFileReader fileReader;
+public class FileSysTable implements ITableReader {
+    private final Conf conf;
+    private final FileIndex fileIndex;
+    private final FileReader fileReader;
 
-    public FileSysTable(IConf conf, IFileIndex fileIndex, IFileReader fileReader) {
+    public FileSysTable(Conf conf, FileIndex fileIndex, FileReader fileReader) {
         this.conf = conf;
         this.fileIndex = fileIndex;
         this.fileReader = fileReader;
     }
 
-    @Override
-    public IConf getConf() {
+    public Conf getConf() {
         return conf;
     }
 
     @Override
     public Iterable<IResult> scan(byte[] inclStart, byte[] exclStop) throws IOException {
         List<Iterable<IResult>> possibleHitIterators = new ArrayList<Iterable<IResult>>();
-        for (IFileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
+        for (FileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
             possibleHitIterators.add(fileReader.scanInFile(inclStart, exclStop, possibleHit));
         }
         return new ChainedIterable<IResult>(possibleHitIterators);
@@ -47,7 +42,7 @@ public class FileSysTable implements IFileSysTable {
     @Override
     public IResult get(byte[] key) throws IOException {
         IResult hit = null;
-        for (IFileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
+        for (FileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
             if (hit==null) {
                 hit = fileReader.getInFile(key, possibleHit);
             } else {

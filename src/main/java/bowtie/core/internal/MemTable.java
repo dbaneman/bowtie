@@ -1,12 +1,9 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IConf;
-import bowtie.core.api.external.IResult;
-import bowtie.core.api.internal.IFileIndex;
-import bowtie.core.api.internal.IFileIndexEntry;
-import bowtie.core.api.internal.IMemTable;
-import bowtie.core.util.ByteUtils;
-import bowtie.core.util.ChainedIterable;
+import bowtie.core.IResult;
+import bowtie.core.ITable;
+import bowtie.core.internal.util.ByteUtils;
+import bowtie.core.internal.util.ChainedIterable;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -19,14 +16,14 @@ import java.util.*;
  * Time: 8:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MemTable implements IMemTable {
+public class MemTable implements ITable {
     private NavigableMap<byte[], byte[]> map;
     private NavigableMap<byte[], byte[]> mapCurrentlyFlushing;
-    private final IConf conf;
-    private final IFileIndex fileIndex;
+    private final Conf conf;
+    private final FileIndex fileIndex;
     private long size;
 
-    public MemTable(final IConf conf, final IFileIndex fileIndex) {
+    public MemTable(final Conf conf, final FileIndex fileIndex) {
         this.conf = conf;
         this.fileIndex = fileIndex;
         map = newMap();
@@ -37,8 +34,7 @@ public class MemTable implements IMemTable {
         return new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
     }
 
-    @Override
-    public IConf getConf() {
+    public Conf getConf() {
         return conf;
     }
 
@@ -113,12 +109,10 @@ public class MemTable implements IMemTable {
         }
     }
 
-    @Override
     public boolean isFull() {
         return size >= getConf().getLong(Conf.MAX_MEM_STORE_SIZE);
     }
 
-    @Override
     public synchronized void flush() throws IOException {
         if (map.isEmpty()) {
             return;
@@ -129,7 +123,7 @@ public class MemTable implements IMemTable {
         map = newMap();
 
         // flush map to file
-        IFileIndexEntry fileIndexEntry = createFileIndexEntry();
+        FileIndexEntry fileIndexEntry = createFileIndexEntry();
         OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir() + "/" + fileIndexEntry.getFileName()));
         long currentSize = 0;
         byte[] currentEntryBytes;
@@ -150,8 +144,8 @@ public class MemTable implements IMemTable {
         fileIndex.addEntry(fileIndexEntry);
     }
 
-    private IFileIndexEntry createFileIndexEntry() {
-        IFileIndexEntry fileIndexEntry = new FileIndexEntry();
+    private FileIndexEntry createFileIndexEntry() {
+        FileIndexEntry fileIndexEntry = new FileIndexEntry();
         Long timestampForFile;
         String fileName;
         File file;

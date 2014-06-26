@@ -1,6 +1,6 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IResult;
+import bowtie.core.IResult;
 
 import java.util.Arrays;
 

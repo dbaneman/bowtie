@@ -1,4 +1,4 @@
-package bowtie.core.util;
+package bowtie.core.internal.util;
 
 import bowtie.core.exceptions.MoreThanOneException;
 import org.junit.Assert;

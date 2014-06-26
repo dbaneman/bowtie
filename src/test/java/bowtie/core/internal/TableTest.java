@@ -1,6 +1,6 @@
-package bowtie.core.impl;
+package bowtie.core.internal;
 
-import bowtie.core.api.external.IResult;
+import bowtie.core.IResult;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Test;
