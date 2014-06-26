@@ -22,17 +22,11 @@ public class ByteUtils {
         return left.length - right.length;
     }
 
-    private static Comparator<byte[]> comparator;
-    public static Comparator<byte[]> getComparator() {
-        if (comparator==null) {
-            comparator = new Comparator<byte[]>() {
-                @Override
-                public int compare(byte[] o1, byte[] o2) {
-                    return ByteUtils.compare(o1, o2);
-                }
-            };
+    public static Comparator<byte[]> COMPARATOR = new Comparator<byte[]>() {
+        @Override
+        public int compare(byte[] o1, byte[] o2) {
+            return ByteUtils.compare(o1, o2);
         }
-        return comparator;
-    }
+    };
 
 }

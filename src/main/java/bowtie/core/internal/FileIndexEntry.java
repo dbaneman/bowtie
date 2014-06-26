@@ -1,5 +1,7 @@
 package bowtie.core.internal;
 
+import bowtie.core.internal.util.ByteUtils;
+
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -17,11 +19,12 @@ public class FileIndexEntry {
     private final NavigableMap<byte[], Long> keyPositions;
 
     public FileIndexEntry() {
-        this.keyPositions = new TreeMap<byte[], Long>();
+        this.keyPositions = new TreeMap<byte[], Long>(ByteUtils.COMPARATOR);
     }
 
     public void setStartKey(byte[] startKey) {
         this.startKey = startKey;
+        addIndexedKey(startKey, 0);
     }
 
     public void setEndKey(byte[] endKey) {

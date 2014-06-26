@@ -3,6 +3,7 @@ package bowtie.core.internal;
 import bowtie.core.Result;
 import org.junit.Assert;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -15,10 +16,18 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class TableImplTest {
-    TableImpl table = new TableImpl(new Conf());
+    TableImpl table = new TableImpl(new Conf(), "foo");
     byte[] key = new byte[]{1};
     byte[] value = new byte[]{2};
     byte[] value2 = new byte[]{10};
+
+    @Before
+    public void before() throws Exception {
+        if (table.exists()) {
+            table.drop();
+        }
+        table.create();
+    }
 
     @Test
     public void testPut() throws Exception {
@@ -74,15 +83,33 @@ public class TableImplTest {
     }
 
     @Test
-    public void testClear() throws Exception {
+    public void testDrop() throws Exception {
         table.put(key, value);
         Assert.assertFalse(table.get(key).noVal());
-        table.clear();
+        table.drop();
+        table.create();
         Assert.assertTrue(table.get(key).noVal());
     }
 
-    @After
-    public void after() throws Exception {
-        table.clear();
+    @Test
+    public void testScanAfterFlush() throws Exception {
+        Assert.assertFalse("implement me!", true);
+    }
+
+    @Test
+    public void testGetAfterFlush() throws Exception {
+        table.put(key, value);
+        table.flush();
+        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
+    }
+
+    @Test
+    public void testGetAfterOverwriteAfterFlush() throws Exception {
+        Assert.assertFalse("implement me!", true);
+    }
+
+    @Test
+    public void testDeleteAfterFlush() throws Exception {
+        Assert.assertFalse("implement me!", true);
     }
 }

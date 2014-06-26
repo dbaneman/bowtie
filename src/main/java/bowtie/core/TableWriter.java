@@ -17,5 +17,5 @@ public interface TableWriter {
 
     void delete(byte[] key) throws IOException;
 
-    void clear() throws IOException;
+    void flush() throws IOException;
 }

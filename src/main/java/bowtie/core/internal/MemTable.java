@@ -1,7 +1,8 @@
 package bowtie.core.internal;
 
 import bowtie.core.Result;
-import bowtie.core.Table;
+import bowtie.core.TableReader;
+import bowtie.core.TableWriter;
 import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.ChainedIterable;
 
@@ -16,22 +17,24 @@ import java.util.*;
  * Time: 8:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MemTable implements Table {
+public class MemTable implements TableReader, TableWriter {
     private NavigableMap<byte[], byte[]> map;
     private NavigableMap<byte[], byte[]> mapCurrentlyFlushing;
     private final Conf conf;
     private final FileIndex fileIndex;
     private long size;
+    private String name;
 
-    public MemTable(final Conf conf, final FileIndex fileIndex) {
+    public MemTable(final Conf conf, final FileIndex fileIndex, final String name) {
         this.conf = conf;
+        this.name = name;
         this.fileIndex = fileIndex;
         map = newMap();
         size = 0;
     }
 
     private static NavigableMap<byte[], byte[]> newMap() {
-        return new TreeMap<byte[], byte[]>(ByteUtils.getComparator());
+        return new TreeMap<byte[], byte[]>(ByteUtils.COMPARATOR);
     }
 
     public Conf getConf() {
@@ -101,7 +104,6 @@ public class MemTable implements Table {
         size -= (key.length + value.length);
     }
 
-    @Override
     public void clear() throws IOException {
         map.clear();
         if (mapCurrentlyFlushing != null) {
@@ -113,6 +115,7 @@ public class MemTable implements Table {
         return size >= getConf().getLong(Conf.MAX_MEM_STORE_SIZE);
     }
 
+    @Override
     public synchronized void flush() throws IOException {
         if (map.isEmpty()) {
             return;
@@ -124,7 +127,7 @@ public class MemTable implements Table {
 
         // flush map to file
         FileIndexEntry fileIndexEntry = createFileIndexEntry();
-        OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir() + "/" + fileIndexEntry.getFileName()));
+        OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir(getName()) + fileIndexEntry.getFileName()));
         long currentSize = 0;
         byte[] currentEntryBytes;
         fileIndexEntry.setStartKey(mapCurrentlyFlushing.firstKey());
@@ -138,6 +141,9 @@ public class MemTable implements Table {
             }
             currentSize += currentEntryBytes.length;
         }
+
+        // write 0 to indicate end of file, then close
+        fileOutputStream.write(ByteBuffer.allocate(2).putShort((short)  -1).array());
         fileOutputStream.close();
 
         // update file index
@@ -151,9 +157,9 @@ public class MemTable implements Table {
         File file;
         do {
             timestampForFile = System.currentTimeMillis();
-            fileName = getConf().getDataDir() + "/" + timestampForFile;
+            fileName = getConf().getDataDir(getName()) + "/" + timestampForFile;
             file = new File(fileName);
-        } while (!file.exists());
+        } while (file.exists());
         fileIndexEntry.setFileName(timestampForFile.toString());
         return fileIndexEntry;
     }
@@ -166,5 +172,9 @@ public class MemTable implements Table {
         byteBuffer.putShort((short) entry.getValue().length);
         byteBuffer.put(entry.getValue());
         return byteBuffer.array();
+    }
+
+    public String getName() {
+        return name;
     }
 }

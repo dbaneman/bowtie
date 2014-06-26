@@ -1,5 +1,7 @@
 package bowtie.core;
 
+import java.io.IOException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dan
@@ -8,4 +10,8 @@ package bowtie.core;
  * To change this template use File | Settings | File Templates.
  */
 public interface Table extends TableReader, TableWriter {
+    void create() throws IOException;
+    void drop() throws IOException;
+    String getName();
+    boolean exists();
 }

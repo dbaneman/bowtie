@@ -33,7 +33,7 @@ public class ByteUtilsTest {
 
     @Test
     public void testGetComparator() throws Exception {
-        SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(ByteUtils.getComparator());
+        SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(ByteUtils.COMPARATOR);
         map.put(b1, 0);
         map.put(b2, 0);
         map.put(b3, 0);

@@ -20,16 +20,18 @@ public class FileReader {
     private final Conf conf;
     private final FileIndex fileIndex;
     private final GetOne<Result> getOneResult;
+    private final String tableName;
 
-    public FileReader(Conf conf, FileIndex fileIndex) {
+    public FileReader(Conf conf, FileIndex fileIndex, String tableName) {
         this.conf = conf;
         this.fileIndex = fileIndex;
         getOneResult = new GetOne<Result>();
+        this.tableName = tableName;
     }
 
     public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
         long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
-        String fileLocation = getConf().getDataDir() + possibleHit.getFileName();
+        String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
         return new ScanIterable(fileLocation, position, inclStart, exclStop);
     }
 
@@ -63,13 +65,16 @@ public class FileReader {
                     byte[] value;
                     do {
                         short keyLength = file.readShort();
+                        if (keyLength == -1) {
+                            return null;
+                        }
                         key = new byte[keyLength];
                         file.readFully(key);
                         short valueLength = file.readShort();
                         value = new byte[valueLength];
                         file.readFully(value);
                     } while (ByteUtils.compare(key, inclStart) < 0);
-                    if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || ByteUtils.compare(key, exclStop) >= 0) {
+                    if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || (exclStop!=null && ByteUtils.compare(key, exclStop) >= 0)) {
                         return null;
                     }
                     return new ResultImpl(key, value);

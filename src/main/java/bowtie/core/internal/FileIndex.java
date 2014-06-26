@@ -18,7 +18,7 @@ public class FileIndex {
     private final NavigableMap<byte[], FileIndexEntry> index;
 
     public FileIndex() {
-        this.index = new TreeMap<byte[], FileIndexEntry>(ByteUtils.getComparator());
+        this.index = new TreeMap<byte[], FileIndexEntry>(ByteUtils.COMPARATOR);
     }
 
     public void addEntry(FileIndexEntry entry) {

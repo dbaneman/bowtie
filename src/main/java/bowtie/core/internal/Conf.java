@@ -18,7 +18,6 @@ public class Conf {
     public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-size-in-bytes";
     public static final String HOME_DIR = "bowtie.home-dir";
     public static final String BYTES_BETWEEN_INDEXED_KEYS = "bowtie.bytes-between-indexed-keys";
-    public static final String TABLE_NAME = "bowtie.table-name";
 
     private final Config config;
     private final Map<String, Object> parameterCache;
@@ -36,8 +35,8 @@ public class Conf {
         this(ConfigFactory.load());
     }
 
-    public String getDataDir() {
-        return getString(HOME_DIR) + getString(TABLE_NAME) + "/";
+    public String getDataDir(String tableName) {
+        return getString(HOME_DIR) + tableName + "/";
     }
 
     public String getString(String parameter) {
@@ -52,7 +51,10 @@ public class Conf {
 
     public Long getLong(String parameter) {
         cacheIfNotCached(parameter);
-        return (Long) parameterCache.get(parameter);
+        final Object ret = parameterCache.get(parameter);
+        return ret instanceof Integer
+                ? (Long) ((long) ((Integer) ret))
+                : (Long) ret;
     }
 
     public Boolean getBoolean(String parameter) {
