@@ -26,8 +26,8 @@ public class FileIndex {
      * LT exclEnd AND whose end key GE inclStart. These files are returned as a priority queue, with priority given to the file
      * with the latest timestamp.
      */
-    public PriorityQueue<FileIndexEntry> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd) {
-        PriorityQueue<FileIndexEntry> ret = new PriorityQueue<FileIndexEntry>();
+    public List<FileIndexEntry> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd) {
+        List<FileIndexEntry> ret = new ArrayList<FileIndexEntry>();
         final Map<byte[], FileIndexEntry> headMap = exclEnd==null
                 ? index.headMap(inclStart, true)
                 : index.headMap(exclEnd, false);

@@ -1,6 +1,7 @@
 package bowtie.core.internal.util;
 
 import java.util.Comparator;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,7 +28,7 @@ public class ByteUtils {
 
     public static Comparator<byte[]> COMPARATOR = new Comparator<byte[]>() {
         @Override
-        public int compare(byte[] o1, byte[] o2) {
+        public int compare(final byte[] o1, final byte[] o2) {
             return ByteUtils.compare(o1, o2);
         }
     };

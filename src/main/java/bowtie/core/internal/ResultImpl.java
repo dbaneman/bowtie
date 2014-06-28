@@ -1,8 +1,10 @@
 package bowtie.core.internal;
 
 import bowtie.core.Result;
+import bowtie.core.internal.util.ByteUtils;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,18 +14,36 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultImpl implements Result {
+    public static final Long MEM_TIMESTAMP = Long.MAX_VALUE;
+    public static final Long LATEST_FS_TIMESTAMP = MEM_TIMESTAMP - 1;
+    public static Comparator<Result> KEY_BASED_RESULT_COMPARATOR = new Comparator<Result>() {
+        @Override
+        public int compare(Result o1, Result o2) {
+            final int keyComparison = ByteUtils.compare(o1.getKey(), o2.getKey());
+            return keyComparison != 0
+                    ? keyComparison
+                    : ((ResultImpl) o2).getTimestamp().compareTo(((ResultImpl) o1).getTimestamp());
+        }
+    };
+
     private final byte[] key;
     private final byte[] value;
     private final boolean isDeleted; // tells us if the value was found as a deleted value, as opposed to not being found at all (relevant because "not found" means we should keep checking older versions, but "deleted" means we're done looking)
+    private final Long timestamp;
 
-    public ResultImpl(final byte[] key, final byte[] value) {
-        this(key, value, false);
+    public static ResultImpl wrap(final byte[] key, final byte[] value) {
+        return new ResultImpl(key, value, null);
     }
 
-    public ResultImpl(final byte[] key, final byte[] value, final boolean isDeleted) {
+    public ResultImpl(final byte[] key, final byte[] value, final Long timestamp) {
+        this(key, value, timestamp, false);
+    }
+
+    public ResultImpl(final byte[] key, final byte[] value, final Long timestamp, final boolean isDeleted) {
         this.key = key;
         this.value = value;
         this.isDeleted = isDeleted;
+        this.timestamp = timestamp;
     }
 
     @Override
@@ -66,5 +86,9 @@ public class ResultImpl implements Result {
 
     public boolean isDeleted() {
         return isDeleted;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
     }
 }

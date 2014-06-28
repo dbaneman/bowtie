@@ -19,6 +19,7 @@ import java.util.List;
 public class TableImplTest {
     TableImpl table = new TableImpl(new Conf(), "foo");
     byte[] key = new byte[]{1};
+    byte[] key2 = new byte[]{2};
     byte[] value = new byte[]{10};
     byte[] value2 = new byte[]{20, 30, 40};
     byte[] value3 = new byte[]{50, 60, 70, 80, 90};
@@ -36,7 +37,7 @@ public class TableImplTest {
     public void testPut() throws Exception {
         Assert.assertTrue(table.get(key).noVal());
         table.put(key, value);
-        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value), table.get(key));
     }
 
     @Test
@@ -56,11 +57,11 @@ public class TableImplTest {
         }
         results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(1), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(3), value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -79,7 +80,7 @@ public class TableImplTest {
         table.flush();
         Iterator<Result> iterator = table.scan(orderedKeys.get(2), orderedKeys.get(3)).iterator();
         Assert.assertTrue(iterator.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), iterator.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value), iterator.next());
         Assert.assertFalse(iterator.hasNext());
     }
 
@@ -87,14 +88,14 @@ public class TableImplTest {
     public void testGetSingle() throws Exception {
         Assert.assertTrue(table.get(key).noVal());
         table.put(key, value);
-        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value), table.get(key));
     }
 
     @Test
     public void testGetAfterOverwrite() throws Exception {
         table.put(key, value);
         table.put(key, value2);
-        Assert.assertEquals(new ResultImpl(key, value2), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
     }
 
     @Test
@@ -114,11 +115,11 @@ public class TableImplTest {
         table.flush();
         Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(1), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(3), value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -132,11 +133,11 @@ public class TableImplTest {
         table.put(orderedKeys.get(3), value);
         Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(1), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(3), value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -152,11 +153,11 @@ public class TableImplTest {
         table.flush();
         Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(1), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(3), value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -169,7 +170,7 @@ public class TableImplTest {
     public void testGetAfterFlush() throws Exception {
         table.put(key, value);
         table.flush();
-        Assert.assertEquals(new ResultImpl(key, value), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value), table.get(key));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class TableImplTest {
         table.put(key, value);
         table.flush();
         table.put(key, value2);
-        Assert.assertEquals(new ResultImpl(key, value2), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
     }
 
     @Test
@@ -186,7 +187,7 @@ public class TableImplTest {
         table.flush();
         table.put(key, value2);
         table.flush();
-        Assert.assertEquals(new ResultImpl(key, value2), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
     }
 
     @Test
@@ -194,7 +195,7 @@ public class TableImplTest {
         table.put(key, value);
         table.put(key, value2);
         table.put(key, value3);
-        Assert.assertEquals(new ResultImpl(key, value3), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value3), table.get(key));
     }
 
     @Test
@@ -205,7 +206,20 @@ public class TableImplTest {
         table.flush();
         table.put(key, value3);
         table.flush();
-        Assert.assertEquals(new ResultImpl(key, value3), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key, value3), table.get(key));
+    }
+
+    @Test
+    public void testGetMultipleFlushedUpdatesWithSameStartKey() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.put(key, value2);
+        table.put(key2, value);
+        table.flush();
+        table.put(key, value3);
+        table.flush();
+        Assert.assertEquals(ResultImpl.wrap(key, value3), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key2, value), table.get(key2));
     }
 
     @Test
@@ -240,7 +254,7 @@ public class TableImplTest {
         table.flush();
         table.put(orderedKeys.get(2), value2);
         table.flush();
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value2), table.get(orderedKeys.get(2)));
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value2), table.get(orderedKeys.get(2)));
     }
 
     @Test
@@ -252,7 +266,7 @@ public class TableImplTest {
         table.flush();
         Iterator<Result> iterator = table.scan(orderedKeys.get(2), orderedKeys.get(3)).iterator();
         Assert.assertTrue(iterator.hasNext());
-        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value2), iterator.next());
+        Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value2), iterator.next());
         Assert.assertFalse(iterator.hasNext());
     }
 

@@ -2,10 +2,12 @@ package bowtie.core.internal;
 
 import bowtie.core.Result;
 import bowtie.core.internal.util.ByteUtils;
-import bowtie.core.internal.util.GetOne;
 import bowtie.core.internal.util.ReadAheadIterator;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
@@ -19,20 +21,18 @@ import java.util.Iterator;
 public class FileReader {
     private final Conf conf;
     private final FileIndex fileIndex;
-    private final GetOne<Result> getOneResult;
     private final String tableName;
 
     public FileReader(Conf conf, FileIndex fileIndex, String tableName) {
         this.conf = conf;
         this.fileIndex = fileIndex;
-        getOneResult = new GetOne<Result>();
         this.tableName = tableName;
     }
 
     public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
         long position = fileIndex.getStartingIndexInFileForScan(inclStart, possibleHit);
         String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
-        return new ScanIterable(fileLocation, position, inclStart, exclStop);
+        return new ScanIterable(fileLocation, possibleHit.getFileTimestamp(), position, inclStart, exclStop);
     }
 
     public Conf getConf() {
@@ -43,8 +43,10 @@ public class FileReader {
         private final InputStream fileInputStream;
         private final byte[] inclStart;
         private final byte[] exclStop;
+        private final long fileTimestamp;
 
-        public ScanIterable(final String fileLocation, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
+        public ScanIterable(final String fileLocation, final long fileTimestamp, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
+            this.fileTimestamp = fileTimestamp;
             this.fileInputStream = new BufferedInputStream(new FileInputStream(fileLocation));
             this.inclStart = inclStart;
             this.exclStop = exclStop;
@@ -82,7 +84,7 @@ public class FileReader {
                     if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || (exclStop!=null && ByteUtils.compare(key, exclStop) >= 0)) {
                         return null;
                     }
-                    return new ResultImpl(key, value);
+                    return new ResultImpl(key, value, fileTimestamp);
                 }
 
                 @Override

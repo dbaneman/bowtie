@@ -3,7 +3,8 @@ package bowtie.core.internal;
 import bowtie.core.Result;
 import bowtie.core.Table;
 import bowtie.core.TableReader;
-import bowtie.core.exceptions.TableAlreadyExistsException;import bowtie.core.exceptions.TableDoesNotExistException;import bowtie.core.internal.util.ChainedIterable;
+import bowtie.core.exceptions.TableAlreadyExistsException;import bowtie.core.exceptions.TableDoesNotExistException;
+import bowtie.core.internal.util.MergedNoDuplicatesIterable;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -86,7 +87,7 @@ public class TableImpl implements Table, TableReader {
     @Override
     public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
         checkTableExists();
-        return new ChainedIterable<Result>(memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
+        return new MergedNoDuplicatesIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
     }
 
     @Override

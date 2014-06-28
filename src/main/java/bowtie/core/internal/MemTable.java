@@ -52,7 +52,7 @@ public class MemTable implements TableReader, TableWriter {
         final byte[] value = map.get(key);
         // since we designate deleted keys by putting a null value, we can distinguish between an absent value and a deleted value by checking if the map contains the specified key
         final boolean isDeleted = value==null && map.containsKey(key);
-        return new ResultImpl(key, value, isDeleted);
+        return new ResultImpl(key, value, ResultImpl.MEM_TIMESTAMP, isDeleted);
     }
 
     private static Iterable<Result> scan(byte[] inclStart, byte[] exclStop, SortedMap<byte[], byte[]> map) {
@@ -69,7 +69,7 @@ public class MemTable implements TableReader, TableWriter {
                     @Override
                     public Result next() {
                         final Map.Entry<byte[], byte[]> next = subMapIterator.next();
-                        return new ResultImpl(next.getKey(), next.getValue());
+                        return new ResultImpl(next.getKey(), next.getValue(), ResultImpl.MEM_TIMESTAMP);
                     }
 
                     @Override
@@ -146,7 +146,6 @@ public class MemTable implements TableReader, TableWriter {
     }
 
     private FileIndexEntry createFileIndexEntry() {
-        FileIndexEntry fileIndexEntry = new FileIndexEntry();
         Long timestampForFile;
         String fileName;
         File file;
@@ -155,8 +154,7 @@ public class MemTable implements TableReader, TableWriter {
             fileName = getConf().getDataDir(getName()) + "/" + timestampForFile;
             file = new File(fileName);
         } while (file.exists());
-        fileIndexEntry.setFileName(timestampForFile.toString());
-        return fileIndexEntry;
+        return new FileIndexEntry(timestampForFile);
     }
 
     private byte[] encodeEntry(Map.Entry<byte[], byte[]> entry) {

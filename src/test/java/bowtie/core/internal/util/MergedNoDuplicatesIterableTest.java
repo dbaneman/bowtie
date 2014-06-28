@@ -1,12 +1,9 @@
 package bowtie.core.internal.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +12,13 @@ import java.util.List;
  * Time: 9:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ChainedIterableTest {
+public class MergedNoDuplicatesIterableTest {
+    private static final Comparator<Integer> INTEGER_COMPARATOR = new Comparator<Integer>() {
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            return o1.compareTo(o2);
+        }
+    };
 
     @Test
     public void testIterator() throws Exception {
@@ -24,7 +27,7 @@ public class ChainedIterableTest {
         List<Integer> list3 = Arrays.asList(6);
         List<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6);
         List<Integer> actual = new ArrayList<Integer>();
-        ChainedIterable<Integer> chainedIterable = new ChainedIterable<Integer>(list1, list2, list3);
+        MergedNoDuplicatesIterable<Integer> chainedIterable = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, list1, list2, list3);
         for (Integer i : chainedIterable) {
             actual.add(i);
         }
@@ -39,7 +42,7 @@ public class ChainedIterableTest {
         List<Integer> list4 = Arrays.asList(6);
         List<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6);
         List<Integer> actual = new ArrayList<Integer>();
-        ChainedIterable<Integer> chainedIterable = new ChainedIterable<Integer>(list1, list2, list3, list4);
+        MergedNoDuplicatesIterable<Integer> chainedIterable = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, list1, list2, list3, list4);
         for (Integer i : chainedIterable) {
             actual.add(i);
         }
@@ -54,7 +57,7 @@ public class ChainedIterableTest {
         List<Integer> list4 = Arrays.asList(6);
         List<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6);
         List<Integer> actual = new ArrayList<Integer>();
-        Iterator<Integer> chainedIterableIterator  = new ChainedIterable<Integer>(list1, list2, list3, list4).iterator();
+        Iterator<Integer> chainedIterableIterator  = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, list1, list2, list3, list4).iterator();
         for (int i=0; i<6; i++) {
             actual.add(chainedIterableIterator.next());
         }
@@ -64,12 +67,28 @@ public class ChainedIterableTest {
     @Test
     public void testMultipleChainedIterables() throws Exception {
         List<Integer> iterable1 = Arrays.asList(1, 2);
-        ChainedIterable<Integer> iterable2 = new ChainedIterable<Integer>();
-        ChainedIterable<Integer> iterable3 = new ChainedIterable<Integer>(Arrays.asList(3,4), Arrays.asList(5,6));
-        ChainedIterable<Integer> chainedIterable = new ChainedIterable<Integer>(iterable1, iterable2, iterable3);
+        MergedNoDuplicatesIterable<Integer> iterable2 = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR);
+        MergedNoDuplicatesIterable<Integer> iterable3 = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, Arrays.asList(3,4), Arrays.asList(5,6));
+        MergedNoDuplicatesIterable<Integer> chainedIterable = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, iterable1, iterable2, iterable3);
         List<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6);
         List<Integer> actual = new ArrayList<Integer>();
         for (Integer i : chainedIterable) {
+            actual.add(i);
+        }
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDuplicates() throws Exception {
+        List<Integer> iterable1 = Arrays.asList(1, 2, 3);
+        List<Integer> iterable2 = Arrays.asList(3, 5, 7);
+        List<Integer> iterable3 = Arrays.asList(2, 3, 5, 6, 8);
+        List<Integer> iterable4 = Arrays.asList();
+        List<Integer> iterable5 = Arrays.asList(8);
+        MergedNoDuplicatesIterable<Integer> mergedIterable = new MergedNoDuplicatesIterable<Integer>(INTEGER_COMPARATOR, iterable1, iterable2, iterable3, iterable4, iterable5);
+        List<Integer> expected = Arrays.asList(1, 2, 3, 5, 6, 7, 8);
+        List<Integer> actual = new ArrayList<Integer>();
+        for (Integer i : mergedIterable) {
             actual.add(i);
         }
         Assert.assertEquals(expected, actual);
