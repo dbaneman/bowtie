@@ -1,6 +1,8 @@
 Local:
-- implement delete (we can say that value length of -2 means it's deleted. on compaction we can just eliminate that record entirely.)
+x- implement delete (we can say that value length of -2 means it's deleted. on compaction we can just eliminate that record entirely.)
 - implement update (in-memory, latest value wins; from disk, value with latest file timestamp wins)
+--> make sure ChainedIterables are sorted (merge sort style) when needed
+- think about interaction between scans and updates/deletes. when we're picking off the front of multiple sources, we need to make sure we're taking the latest timestamp first. and then if we see that value after, we need to ignore it. so we should always be storing the most recent value read.
 - make sure file index is persisted
 - test basic persistence (restart)
 - clean up conf

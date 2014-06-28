@@ -4,7 +4,6 @@ import bowtie.core.Result;
 import bowtie.core.TableReader;
 import bowtie.core.TableWriter;
 import bowtie.core.internal.util.ByteUtils;
-import bowtie.core.internal.util.ChainedIterable;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -19,7 +18,6 @@ import java.util.*;
  */
 public class MemTable implements TableReader, TableWriter {
     private NavigableMap<byte[], byte[]> map;
-    private NavigableMap<byte[], byte[]> mapCurrentlyFlushing;
     private final Conf conf;
     private final FileIndex fileIndex;
     private long size;
@@ -43,9 +41,7 @@ public class MemTable implements TableReader, TableWriter {
 
     @Override
     public Iterable<Result> scan(byte[] inclStart, byte[] exclStop) {
-        return mapCurrentlyFlushing!=null
-                ? new ChainedIterable<Result>(scan(inclStart, exclStop, map), scan(inclStart, exclStop, mapCurrentlyFlushing))
-                : scan(inclStart, exclStop, map);
+        return scan(inclStart, exclStop, map);
     }
 
     @Override
@@ -109,9 +105,6 @@ public class MemTable implements TableReader, TableWriter {
 
     public void clear() throws IOException {
         map.clear();
-        if (mapCurrentlyFlushing != null) {
-            mapCurrentlyFlushing.clear();
-        }
     }
 
     public boolean isFull() {
@@ -119,23 +112,19 @@ public class MemTable implements TableReader, TableWriter {
     }
 
     @Override
-    public synchronized void flush() throws IOException {
+    public void flush() throws IOException {
         if (map.isEmpty()) {
             return;
         }
-
-        // from this point on, writes go to a new map. until this is done flushing, reads will come from both the new and flushing map.
-        mapCurrentlyFlushing = map;
-        map = newMap();
 
         // flush map to file
         FileIndexEntry fileIndexEntry = createFileIndexEntry();
         OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir(getName()) + fileIndexEntry.getFileName()));
         long currentSize = 0;
         byte[] currentEntryBytes;
-        fileIndexEntry.setStartKey(mapCurrentlyFlushing.firstKey());
-        fileIndexEntry.setEndKey(mapCurrentlyFlushing.lastKey());
-        for (Map.Entry<byte[], byte[]> entry : mapCurrentlyFlushing.entrySet()) {
+        fileIndexEntry.setStartKey(map.firstKey());
+        fileIndexEntry.setEndKey(map.lastKey());
+        for (Map.Entry<byte[], byte[]> entry : map.entrySet()) {
             currentEntryBytes = encodeEntry(entry);
             fileOutputStream.write(currentEntryBytes);
             if (currentSize > getConf().getLong(Conf.BYTES_BETWEEN_INDEXED_KEYS)) {
@@ -151,6 +140,9 @@ public class MemTable implements TableReader, TableWriter {
 
         // update file index
         fileIndex.addEntry(fileIndexEntry);
+
+        // clear memtable
+        map.clear();
     }
 
     private FileIndexEntry createFileIndexEntry() {

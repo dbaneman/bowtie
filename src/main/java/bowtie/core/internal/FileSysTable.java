@@ -6,6 +6,7 @@ import bowtie.core.internal.util.ChainedIterable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -41,16 +42,10 @@ public class FileSysTable implements TableReader {
 
     @Override
     public Result get(byte[] key) throws IOException {
-        Result hit = null;
-        for (FileIndexEntry possibleHit : fileIndex.getFilesPossiblyContainingKey(key)) {
-            if (hit==null) {
-                hit = fileReader.getInFile(key, possibleHit);
-            } else {
-                // TODO: implement this
-                throw new RuntimeException("We don't yet support multiple values for the same key! Should pick latest based on timestamp or something.");
-            }
-        }
-        return hit!=null ? hit : new ResultImpl(key, null);
+        Iterator<Result> scanHits = scan(key, null).iterator();
+        return scanHits.hasNext()
+                ? scanHits.next()
+                : new ResultImpl(key, null);
     }
 
 }

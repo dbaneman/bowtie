@@ -30,13 +30,9 @@ public class FileReader {
     }
 
     public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
-        long position = fileIndex.getClosestPositionBeforeOrAtKey(inclStart, possibleHit);
+        long position = fileIndex.getStartingIndexInFileForScan(inclStart, possibleHit);
         String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
         return new ScanIterable(fileLocation, position, inclStart, exclStop);
-    }
-
-    public Result getInFile(byte[] key, FileIndexEntry possibleHit) throws IOException {
-        return getOneResult.apply(scanInFile(key, null, possibleHit));
     }
 
     public Conf getConf() {

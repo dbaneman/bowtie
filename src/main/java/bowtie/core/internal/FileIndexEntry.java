@@ -12,7 +12,7 @@ import java.util.TreeMap;
  * Time: 6:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileIndexEntry {
+public class FileIndexEntry implements Comparable<FileIndexEntry> {
     private byte[] startKey;
     private byte[] endKey;
     private String fileName;
@@ -55,4 +55,8 @@ public class FileIndexEntry {
         return keyPositions;
     }
 
+    @Override
+    public int compareTo(FileIndexEntry that) {
+        return that.fileName.compareTo(this.fileName);
+    }
 }
