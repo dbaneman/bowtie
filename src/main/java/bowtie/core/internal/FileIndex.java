@@ -20,7 +20,7 @@ public class FileIndex {
     public void addEntry(FileIndexEntry entry) {
         List<FileIndexEntry> entries = index.get(entry.getStartKey());
         if (entries == null) {
-            entries = new ArrayList<FileIndexEntry>();
+            entries = new ArrayList<FileIndexEntry>(1);
         }
         entries.add(entry);
         index.put(entry.getStartKey(), entries);
