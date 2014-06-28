@@ -11,14 +11,19 @@ import java.util.*;
  * Time: 6:14 PM
  */
 public class FileIndex {
-    private final NavigableMap<byte[], FileIndexEntry> index;
+    private final NavigableMap<byte[], List<FileIndexEntry>> index;
 
     public FileIndex() {
-        this.index = new TreeMap<byte[], FileIndexEntry>(ByteUtils.COMPARATOR);
+        this.index = new TreeMap<byte[], List<FileIndexEntry>>(ByteUtils.COMPARATOR);
     }
 
     public void addEntry(FileIndexEntry entry) {
-        index.put(entry.getStartKey(), entry);
+        List<FileIndexEntry> entries = index.get(entry.getStartKey());
+        if (entries == null) {
+            entries = new ArrayList<FileIndexEntry>();
+        }
+        entries.add(entry);
+        index.put(entry.getStartKey(), entries);
     }
 
     /**
@@ -28,12 +33,14 @@ public class FileIndex {
      */
     public List<FileIndexEntry> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd) {
         List<FileIndexEntry> ret = new ArrayList<FileIndexEntry>();
-        final Map<byte[], FileIndexEntry> headMap = exclEnd==null
+        final Map<byte[], List<FileIndexEntry>> headMap = exclEnd==null
                 ? index.headMap(inclStart, true)
                 : index.headMap(exclEnd, false);
-        for (Map.Entry<byte[], FileIndexEntry> kv : headMap.entrySet()) {
-            if (exclEnd==null || ByteUtils.compare(kv.getValue().getEndKey(), inclStart) >= 0) {
-                ret.add(kv.getValue());
+        for (final Map.Entry<byte[], List<FileIndexEntry>> startKeyAndEntryList : headMap.entrySet()) {
+            for (final FileIndexEntry fileIndexEntry : startKeyAndEntryList.getValue()) {
+                if (exclEnd==null || ByteUtils.compare(fileIndexEntry.getEndKey(), inclStart) >= 0) {
+                    ret.add(fileIndexEntry);
+                }
             }
         }
         return ret;
