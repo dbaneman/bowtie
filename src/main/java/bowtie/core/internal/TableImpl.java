@@ -49,7 +49,7 @@ public class TableImpl implements Table, TableReader {
         FileUtils.forceMkdir(tableDir);
     }
 
-    private void checkExists() {
+    private void checkTableExists() {
         if (!exists()) {
             throw new TableDoesNotExistException(getName());
         }
@@ -57,14 +57,14 @@ public class TableImpl implements Table, TableReader {
 
     @Override
     public void drop() throws IOException {
-        checkExists();
+        checkTableExists();
         memTable.clear();
         FileUtils.deleteDirectory(tableDir);
     }
 
     @Override
     public void put(byte[] key, byte[] value) throws IOException {
-        checkExists();
+        checkTableExists();
         memTable.put(key, value);
         if (memTable.isFull()) {
             memTable.flush();
@@ -73,28 +73,29 @@ public class TableImpl implements Table, TableReader {
 
     @Override
     public void delete(byte[] key) throws IOException {
-        checkExists();
+        checkTableExists();
         memTable.delete(key);
     }
 
     @Override
     public void flush() throws IOException {
-        checkExists();
+        checkTableExists();
         memTable.flush();
     }
 
     @Override
     public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
-        checkExists();
+        checkTableExists();
         return new ChainedIterable<Result>(memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
     }
 
     @Override
     public Result get(byte[] key) throws IOException {
-        checkExists();
-        // TODO: this is only okay if we're certain that memVal is more recent
-        final Result memVal = memTable.get(key);
-        return memVal.noVal() ? fsTable.get(key) : memVal;
+        checkTableExists();
+        final ResultImpl memVal = (ResultImpl) memTable.get(key);
+        return memVal.noVal() && !memVal.isDeleted()
+                ? fsTable.get(key)
+                : memVal;
     }
 
     @Override

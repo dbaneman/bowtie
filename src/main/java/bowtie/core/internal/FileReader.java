@@ -65,17 +65,21 @@ public class FileReader {
                     byte[] value;
                     byte[] length;
                     do {
-                        length = new byte[2];
+                        length = new byte[ByteUtils.SIZE_DESCRIPTOR_LENGTH];
                         fileInputStream.read(length);
                         short keyLength = ByteBuffer.wrap(length).getShort();
-                        if (keyLength == -1) {
+                        if (keyLength == ByteUtils.END_OF_FILE) {
                             return null;
                         }
                         key = new byte[keyLength];
                         fileInputStream.read(key);
-                        length = new byte[2];
+                        length = new byte[ByteUtils.SIZE_DESCRIPTOR_LENGTH];
                         fileInputStream.read(length);
                         short valueLength = ByteBuffer.wrap(length).getShort();
+                        if (valueLength == ByteUtils.DELETED_VALUE) {
+                            value = null;
+                            continue;
+                        }
                         value = new byte[valueLength];
                         fileInputStream.read(value);
                     } while (ByteUtils.compare(key, inclStart) < 0);

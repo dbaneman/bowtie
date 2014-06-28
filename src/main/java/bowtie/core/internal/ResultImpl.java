@@ -14,10 +14,16 @@ import java.util.Arrays;
 public class ResultImpl implements Result {
     private final byte[] key;
     private final byte[] value;
+    private final boolean isDeleted; // tells us if the value was found as a deleted value, as opposed to not being found at all (relevant because "not found" means we should keep checking older versions, but "deleted" means we're done looking)
 
     public ResultImpl(final byte[] key, final byte[] value) {
+        this(key, value, false);
+    }
+
+    public ResultImpl(final byte[] key, final byte[] value, final boolean isDeleted) {
         this.key = key;
         this.value = value;
+        this.isDeleted = isDeleted;
     }
 
     @Override
@@ -56,5 +62,9 @@ public class ResultImpl implements Result {
                 "key=" + Arrays.toString(key) +
                 ", value=" + Arrays.toString(value) +
                 '}';
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
     }
 }

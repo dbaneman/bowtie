@@ -53,7 +53,10 @@ public class MemTable implements TableReader, TableWriter {
         if (key == null) {
             throw new NullPointerException("Attempted to get a null key.");
         }
-        return new ResultImpl(key, map.get(key));
+        final byte[] value = map.get(key);
+        // since we designate deleted keys by putting a null value, we can distinguish between an absent value and a deleted value by checking if the map contains the specified key
+        final boolean isDeleted = value==null && map.containsKey(key);
+        return new ResultImpl(key, value, isDeleted);
     }
 
     private static Iterable<Result> scan(byte[] inclStart, byte[] exclStop, SortedMap<byte[], byte[]> map) {
@@ -99,9 +102,9 @@ public class MemTable implements TableReader, TableWriter {
         if (key == null) {
             throw new NullPointerException("Attempted to delete a null key.");
         }
-        byte[] value = map.get(key);
-        map.remove(key);
-        size -= (key.length + value.length);
+        // we designate deleted keys by putting a null value
+        map.put(key, null);
+        size += key.length;
     }
 
     public void clear() throws IOException {
@@ -142,8 +145,8 @@ public class MemTable implements TableReader, TableWriter {
             currentSize += currentEntryBytes.length;
         }
 
-        // write 0 to indicate end of file, then close
-        fileOutputStream.write(ByteBuffer.allocate(2).putShort((short)  -1).array());
+        // write EOF byte and close file
+        fileOutputStream.write(ByteBuffer.allocate(ByteUtils.SIZE_DESCRIPTOR_LENGTH).putShort(ByteUtils.END_OF_FILE).array());
         fileOutputStream.close();
 
         // update file index
@@ -165,12 +168,19 @@ public class MemTable implements TableReader, TableWriter {
     }
 
     private byte[] encodeEntry(Map.Entry<byte[], byte[]> entry) {
-        int sizeOfEntry = 2 + entry.getKey().length + 2 + entry.getValue().length;
+        int valueLength = entry.getValue() == null
+                ? 0
+                : entry.getValue().length;
+        int sizeOfEntry = ByteUtils.SIZE_DESCRIPTOR_LENGTH + entry.getKey().length + ByteUtils.SIZE_DESCRIPTOR_LENGTH + valueLength;
         ByteBuffer byteBuffer = ByteBuffer.allocate(sizeOfEntry);
         byteBuffer.putShort((short) entry.getKey().length);
         byteBuffer.put(entry.getKey());
-        byteBuffer.putShort((short) entry.getValue().length);
-        byteBuffer.put(entry.getValue());
+        if (entry.getValue() == null) {
+            byteBuffer.putShort(ByteUtils.DELETED_VALUE);
+        } else {
+            byteBuffer.putShort((short) entry.getValue().length);
+            byteBuffer.put(entry.getValue());
+        }
         return byteBuffer.array();
     }
 

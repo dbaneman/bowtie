@@ -5,7 +5,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,8 +19,10 @@ import java.util.Iterator;
 public class TableImplTest {
     TableImpl table = new TableImpl(new Conf(), "foo");
     byte[] key = new byte[]{1};
-    byte[] value = new byte[]{2};
-    byte[] value2 = new byte[]{10};
+    byte[] value = "foo".getBytes();
+    byte[] value2 = "bar".getBytes();
+    byte[] value3 = "bang".getBytes();
+    List<byte[]> orderedKeys = Arrays.asList(new byte[]{0}, new byte[]{1}, new byte[]{2}, new byte[]{3}, new byte[]{4});
 
     @Before
     public void before() throws Exception {
@@ -45,25 +49,18 @@ public class TableImplTest {
 
     @Test
     public void testScan() throws Exception {
-        byte[] key0 = new byte[]{0};
-        byte[] key1 = new byte[]{1};
-        byte[] key2 = new byte[]{2};
-        byte[] key3 = new byte[]{3};
-        byte[] key4 = new byte[]{4};
-        Iterator<Result> results = table.scan(key1, key4).iterator();
+        Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertFalse(results.hasNext());
-        table.put(key0, value);
-        table.put(key1, value);
-        table.put(key2, value);
-        table.put(key3, value);
-        table.put(key4, value);
-        results = table.scan(key1, key4).iterator();
+        for (byte[] key : orderedKeys) {
+            table.put(key, value);
+        }
+        results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(key1, value), results.next());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(key2, value), results.next());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
         Assert.assertTrue(results.hasNext());
-        Assert.assertEquals(new ResultImpl(key3, value), results.next());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
         Assert.assertFalse(results.hasNext());
     }
 
@@ -92,7 +89,56 @@ public class TableImplTest {
 
     @Test
     public void testScanAfterFlush() throws Exception {
-        Assert.assertFalse("implement me!", true);
+        for (byte[] key : orderedKeys) {
+            table.put(key, value);
+        }
+        table.flush();
+        Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertFalse(results.hasNext());
+    }
+
+    @Test
+    public void testScanAfterSomeValuesFlushed() throws Exception {
+        table.put(orderedKeys.get(0), value);
+        table.put(orderedKeys.get(2), value);
+        table.put(orderedKeys.get(4), value);
+        table.flush();
+        table.put(orderedKeys.get(1), value);
+        table.put(orderedKeys.get(3), value);
+        Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertFalse(results.hasNext());
+    }
+
+    @Test
+    public void testScanAfterMultipleFlushes() throws Exception {
+        table.put(orderedKeys.get(0), value);
+        table.put(orderedKeys.get(2), value);
+        table.flush();
+        table.put(orderedKeys.get(1), value);
+        table.put(orderedKeys.get(4), value);
+        table.flush();
+        table.put(orderedKeys.get(3), value);
+        table.flush();
+        Iterator<Result> results = table.scan(orderedKeys.get(1), orderedKeys.get(4)).iterator();
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(1), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(2), value), results.next());
+        Assert.assertTrue(results.hasNext());
+        Assert.assertEquals(new ResultImpl(orderedKeys.get(3), value), results.next());
+        Assert.assertFalse(results.hasNext());
     }
 
     @Test
@@ -108,12 +154,64 @@ public class TableImplTest {
     }
 
     @Test
-    public void testGetAfterOverwriteAfterFlush() throws Exception {
-        Assert.assertFalse("implement me!", true);
+    public void testGetUpdateAfterOriginalValueFlushed() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.put(key, value2);
+        Assert.assertEquals(value2, table.get(key).getValue());
+    }
+
+    @Test
+    public void testGetFlushedUpdateAfterOriginalValueFlushed() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.put(key, value2);
+        table.flush();
+        Assert.assertEquals(value2, table.get(key).getValue());
+    }
+
+    @Test
+    public void testGetMultipleUpdates() throws Exception {
+        table.put(key, value);
+        table.put(key, value2);
+        table.put(key, value3);
+        Assert.assertEquals(value3, table.get(key).getValue());
+    }
+
+    @Test
+    public void testGetMultipleFlushedUpdates() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.put(key, value2);
+        table.flush();
+        table.put(key, value3);
+        table.flush();
+        Assert.assertEquals(value3, table.get(key).getValue());
     }
 
     @Test
     public void testDeleteAfterFlush() throws Exception {
-        Assert.assertFalse("implement me!", true);
+        table.put(key, value);
+        table.delete(key);
+        table.flush();
+        Assert.assertTrue(table.get(key).noVal());
     }
+
+    @Test
+    public void testDeleteAfterOriginalValueFlushed() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.delete(key);
+        Assert.assertTrue(table.get(key).noVal());
+    }
+
+    @Test
+    public void testFlushedDeleteAfterOriginalValueFlushed() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.delete(key);
+        table.flush();
+        Assert.assertTrue(table.get(key).noVal());
+    }
+
 }

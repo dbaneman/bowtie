@@ -10,6 +10,9 @@ import java.util.Comparator;
  * To change this template use File | Settings | File Templates.
  */
 public class ByteUtils {
+    public static final short END_OF_FILE = -1;
+    public static final short DELETED_VALUE = -2;
+    public static final int SIZE_DESCRIPTOR_LENGTH = 2;
 
     public static int compare(final byte[] left, final byte[] right) {
         for (int i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
