@@ -14,4 +14,5 @@ public interface Table extends TableReader, TableWriter {
     void drop() throws IOException;
     String getName();
     boolean exists();
+    void close() throws IOException;
 }

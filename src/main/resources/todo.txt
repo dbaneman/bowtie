@@ -7,7 +7,7 @@ x- let's not have the file index overwrite entries with the same start key
 - make sure file index is persisted
 - test basic persistence (restart)
 - clean up conf
-- compaction
+- compaction (key is that they shouldn't be overlapping)
 - bloom filters
 - add pools for getting tables
 - figure out concurrency and thread safety!

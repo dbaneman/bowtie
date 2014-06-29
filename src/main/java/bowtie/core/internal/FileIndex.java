@@ -28,8 +28,7 @@ public class FileIndex {
 
     /**
      * Return all files possibly containing any entries in the specified key ranges. This means all files whose start key
-     * LT exclEnd AND whose end key GE inclStart. These files are returned as a priority queue, with priority given to the file
-     * with the latest timestamp.
+     * is less than exclEnd AND whose end key is greater than or equal to inclStart.
      */
     public List<FileIndexEntry> getFilesPossiblyContainingKeyRange(byte[] inclStart, byte[] exclEnd) {
         List<FileIndexEntry> ret = new ArrayList<FileIndexEntry>();
