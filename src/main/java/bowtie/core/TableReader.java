@@ -12,4 +12,5 @@ import java.io.IOException;
 public interface TableReader {
     Iterable<Result> scan(byte[] inclStart, byte[] exclStop) throws IOException;
     Result get(byte[] key) throws IOException;
+    void close() throws IOException;
 }

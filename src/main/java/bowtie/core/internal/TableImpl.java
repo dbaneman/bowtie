@@ -3,8 +3,10 @@ package bowtie.core.internal;
 import bowtie.core.Result;
 import bowtie.core.Table;
 import bowtie.core.TableReader;
-import bowtie.core.exceptions.CLosedTableException;
-import bowtie.core.exceptions.TableAlreadyExistsException;import bowtie.core.exceptions.TableDoesNotExistException;
+import bowtie.core.exceptions.ClosedTableException;
+import bowtie.core.exceptions.TableAlreadyExistsException;
+import bowtie.core.exceptions.TableAlreadyOpenException;
+import bowtie.core.exceptions.TableDoesNotExistException;
 import bowtie.core.internal.util.MergedNoDuplicatesIterable;
 import org.apache.commons.io.FileUtils;
 
@@ -19,20 +21,30 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class TableImpl implements Table, TableReader {
-    private final Conf conf;
-    private final MemTable memTable;
-    private final FileSysTable fsTable;
-    private final String name;
-    private final File tableDir;
-    private boolean open = true;
+    private static final Object INDEX_FILE_LOCAL_NAME = "index";
 
-    public TableImpl(final Conf conf, String name) {
+    private final Conf conf;
+    private MemTable memTable;
+    private FileSysTable fsTable;
+    private final String name;
+    private File tableDir;
+    private boolean open = false;
+
+    public TableImpl(final Conf conf, String name) throws IOException {
         this.conf = conf;
         this.name = name;
-        final FileIndex fileIndex = new FileIndex();
+        tableDir = new File(getConf().getDataDir(getName()));
+    }
+
+    @Override
+    public void open() throws IOException {
+        if (open) {
+            throw new TableAlreadyOpenException(getName());
+        }
+        final FileIndex fileIndex = new FileIndex(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
         memTable = new MemTable(conf, fileIndex, name);
         fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex, name));
-        tableDir = new File(getConf().getDataDir(getName()));
+        open = true;
     }
 
     public Conf getConf() {
@@ -46,7 +58,9 @@ public class TableImpl implements Table, TableReader {
 
     @Override
     public void close() throws IOException {
-        flush();
+        checkTableExistsAndOpen();
+        memTable.close();
+        fsTable.close();
         open = false;
     }
 
@@ -59,19 +73,29 @@ public class TableImpl implements Table, TableReader {
     }
 
     private void checkTableExistsAndOpen() {
+        checkOpen();
+        checkTableExists();
+    }
+
+    private void checkOpen() {
         if (!open) {
-            throw new CLosedTableException(getName());
-        }
-        if (!exists()) {
-            throw new TableDoesNotExistException(getName());
+            throw new ClosedTableException(getName());
         }
     }
 
     @Override
     public void drop() throws IOException {
-        checkTableExistsAndOpen();
-        memTable.clear();
+        checkTableExists();
+        if (memTable != null) {
+            memTable.clear();
+        }
         FileUtils.deleteDirectory(tableDir);
+    }
+
+    private void checkTableExists() {
+        if (!exists()) {
+            throw new TableDoesNotExistException(getName());
+        }
     }
 
     @Override

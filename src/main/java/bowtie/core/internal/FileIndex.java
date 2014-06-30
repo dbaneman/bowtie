@@ -1,7 +1,9 @@
 package bowtie.core.internal;
 
 import bowtie.core.internal.util.ByteUtils;
+import org.apache.commons.io.FileUtils;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -12,18 +14,51 @@ import java.util.*;
  */
 public class FileIndex {
     private final NavigableMap<byte[], List<FileIndexEntry>> index;
+    private final OutputStream indexFileWriter;
 
-    public FileIndex() {
-        this.index = new TreeMap<byte[], List<FileIndexEntry>>(ByteUtils.COMPARATOR);
+    public FileIndex(final String indexFileAbsolutePath) throws IOException {
+        final File indexFile = new File(indexFileAbsolutePath);
+        if (indexFile.exists()) {
+            final InputStream indexFileReader = new BufferedInputStream(new FileInputStream(indexFile));
+            index = fromBytes(indexFileReader);
+            indexFileReader.close();
+        } else {
+            index = newMap();
+        }
+        this.indexFileWriter = new BufferedOutputStream(FileUtils.openOutputStream(indexFile, true));
     }
 
-    public void addEntry(FileIndexEntry entry) {
-        List<FileIndexEntry> entries = index.get(entry.getStartKey());
+    private static NavigableMap<byte[], List<FileIndexEntry>> newMap() {
+        return new TreeMap<byte[], List<FileIndexEntry>>(ByteUtils.COMPARATOR);
+    }
+
+    private static NavigableMap<byte[], List<FileIndexEntry>> fromBytes(final InputStream inputStream) throws IOException {
+        final NavigableMap<byte[], List<FileIndexEntry>> ret = newMap();
+        int nextByte;
+        while ((nextByte=inputStream.read()) != -1) {
+            final FileIndexEntry fileIndexEntry = FileIndexEntry.fromBytes(inputStream);
+            addEntryToMap(ret, fileIndexEntry);
+        }
+        return ret;
+    }
+
+    public void addEntry(FileIndexEntry entry) throws IOException {
+        // persist index entry to disk
+        indexFileWriter.write(1);
+        indexFileWriter.write(entry.toBytes());
+        indexFileWriter.flush();
+
+        // add to in-memory index
+        addEntryToMap(index, entry);
+    }
+
+    private static void addEntryToMap(final NavigableMap<byte[], List<FileIndexEntry>> map, final FileIndexEntry entry) {
+        List<FileIndexEntry> entries = map.get(entry.getStartKey());
         if (entries == null) {
             entries = new ArrayList<FileIndexEntry>(1);
         }
         entries.add(entry);
-        index.put(entry.getStartKey(), entries);
+        map.put(entry.getStartKey(), entries);
     }
 
     /**
@@ -54,5 +89,9 @@ public class FileIndex {
         return ByteUtils.compare(possibleHit.getStartKey(), inclStart) <= 0
                 ? possibleHit.getKeyPositions().headMap(inclStart, true).lastEntry().getValue()
                 : possibleHit.getKeyPositions().firstEntry().getValue();
+    }
+
+    public void close() throws IOException {
+        indexFileWriter.close();
     }
 }

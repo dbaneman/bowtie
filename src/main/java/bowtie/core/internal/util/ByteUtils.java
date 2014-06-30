@@ -1,7 +1,8 @@
 package bowtie.core.internal.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Comparator;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,5 +33,14 @@ public class ByteUtils {
             return ByteUtils.compare(o1, o2);
         }
     };
+
+    public static String writeBytes(InputStream bytes) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int next;
+        while ((next=bytes.read()) != -1) {
+            sb.append(next).append("\n");
+        }
+        return sb.toString();
+    }
 
 }

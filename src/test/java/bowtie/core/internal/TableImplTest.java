@@ -17,20 +17,23 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TableImplTest {
-    TableImpl table = new TableImpl(new Conf(), "foo");
-    byte[] key = new byte[]{1};
-    byte[] key2 = new byte[]{2};
-    byte[] value = new byte[]{10};
-    byte[] value2 = new byte[]{20, 30, 40};
+    private static final String TEST_TABLE_NAME = "internal_test";
+    TableImpl table;
+    byte[] key = new byte[]{1, 2};
+    byte[] key2 = new byte[]{2, 3, 4, 5, 7, 7, 8};
+    byte[] value = new byte[]{10, 11, 12};
+    byte[] value2 = new byte[]{20, 30, 40, 50};
     byte[] value3 = new byte[]{50, 60, 70, 80, 90};
     List<byte[]> orderedKeys = Arrays.asList(new byte[]{0}, new byte[]{1}, new byte[]{2}, new byte[]{3}, new byte[]{4});
 
     @Before
     public void before() throws Exception {
+        table = new TableImpl(new Conf(), TEST_TABLE_NAME);
         if (table.exists()) {
             table.drop();
         }
         table.create();
+        table.open();
     }
 
     @Test
@@ -268,6 +271,57 @@ public class TableImplTest {
         Assert.assertTrue(iterator.hasNext());
         Assert.assertEquals(ResultImpl.wrap(orderedKeys.get(2), value2), iterator.next());
         Assert.assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testGetAfterShutdownAndRestart() throws Exception {
+        table.put(key, value);
+        restart();
+        Assert.assertEquals(ResultImpl.wrap(key, value), table.get(key));
+    }
+
+    @Test
+    public void testUpdateAfterShutdownAndRestart() throws Exception {
+        table.put(key, value);
+        table.put(key, value2);
+        restart();
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
+    }
+
+    @Test
+    public void testMultiFlushUpdateAfterShutdownAndRestart() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.put(key, value2);
+        restart();
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
+    }
+
+    @Test
+    public void testMultiFlushUpdateWithMultipleEntriesAfterShutdownAndRestart() throws Exception {
+        table.put(key, value);
+        table.put(key2, value);
+        table.flush();
+        table.put(key, value2);
+        table.put(key2, value2);
+        restart();
+        Assert.assertEquals(ResultImpl.wrap(key, value2), table.get(key));
+        Assert.assertEquals(ResultImpl.wrap(key2, value2), table.get(key2));
+    }
+
+    @Test
+    public void testDeleteAfterShutdownAndRestart() throws Exception {
+        table.put(key, value);
+        table.flush();
+        table.delete(key);
+        restart();
+        Assert.assertTrue(table.get(key).noVal());
+    }
+
+    private void restart() throws Exception {
+        table.close();
+        table = new TableImpl(new Conf(), TEST_TABLE_NAME);
+        table.open();
     }
 
 }

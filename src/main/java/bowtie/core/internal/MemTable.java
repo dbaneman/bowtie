@@ -55,6 +55,11 @@ public class MemTable implements TableReader, TableWriter {
         return new ResultImpl(key, value, ResultImpl.MEM_TIMESTAMP, isDeleted);
     }
 
+    @Override
+    public void close() throws IOException {
+        flush();
+    }
+
     private static Iterable<Result> scan(byte[] inclStart, byte[] exclStop, SortedMap<byte[], byte[]> map) {
         final Iterator<Map.Entry<byte[], byte[]>> subMapIterator = map.subMap(inclStart, exclStop).entrySet().iterator();
         return new Iterable<Result>() {

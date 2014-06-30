@@ -48,4 +48,9 @@ public class FileSysTable implements TableReader {
                 : new ResultImpl(key, null, ResultImpl.LATEST_FS_TIMESTAMP);
     }
 
+    @Override
+    public void close() throws IOException {
+        fileIndex.close();
+    }
+
 }
