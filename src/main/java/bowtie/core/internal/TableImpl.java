@@ -1,5 +1,6 @@
 package bowtie.core.internal;
 
+import bowtie.core.CompactionType;
 import bowtie.core.Result;
 import bowtie.core.Table;
 import bowtie.core.TableReader;
@@ -7,7 +8,7 @@ import bowtie.core.exceptions.ClosedTableException;
 import bowtie.core.exceptions.TableAlreadyExistsException;
 import bowtie.core.exceptions.TableAlreadyOpenException;
 import bowtie.core.exceptions.TableDoesNotExistException;
-import bowtie.core.internal.util.MergedNoDuplicatesIterable;
+import bowtie.core.internal.util.MergedIterable;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,7 +26,7 @@ public class TableImpl implements Table, TableReader {
 
     private final Conf conf;
     private MemTable memTable;
-    private FileSysTable fsTable;
+    private FSTable fsTable;
     private final String name;
     private File tableDir;
     private boolean open = false;
@@ -41,9 +42,9 @@ public class TableImpl implements Table, TableReader {
         if (open) {
             throw new TableAlreadyOpenException(getName());
         }
-        final FileIndex fileIndex = new FileIndex(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
-        memTable = new MemTable(conf, fileIndex, name);
-        fsTable = new FileSysTable(conf, fileIndex, new FileReader(conf, fileIndex, name));
+        final Index index = new Index(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
+        memTable = new MemTable(conf, index, name);
+        fsTable = new FSTable(conf, index, new DataFileReader(conf, index, name));
         open = true;
     }
 
@@ -122,7 +123,7 @@ public class TableImpl implements Table, TableReader {
     @Override
     public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
         checkTableExistsAndOpen();
-        return new MergedNoDuplicatesIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
+        return new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
     }
 
     @Override
@@ -139,4 +140,18 @@ public class TableImpl implements Table, TableReader {
         return name;
     }
 
+    @Override
+    public void beginCompaction(CompactionType compactionType, boolean ignoreSilentlyIfAlreadyCompacting) throws IOException {
+        fsTable.beginCompaction(compactionType, ignoreSilentlyIfAlreadyCompacting);
+    }
+
+    @Override
+    public void waitUntilCompactionComplete() throws InterruptedException {
+        fsTable.waitUntilCompactionComplete();
+    }
+
+    @Override
+    public void waitUntilCompactionComplete(long timeout) throws InterruptedException {
+        fsTable.waitUntilCompactionComplete(timeout);
+    }
 }

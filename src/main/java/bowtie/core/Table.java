@@ -16,4 +16,10 @@ public interface Table extends TableReader, TableWriter {
     boolean exists();
 
     void open() throws IOException;
+
+    void beginCompaction(CompactionType compactionType, boolean ignoreSilentlyIfAlreadyCompacting) throws IOException;
+
+    void waitUntilCompactionComplete() throws InterruptedException;
+
+    void waitUntilCompactionComplete(long timeout) throws InterruptedException;
 }

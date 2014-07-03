@@ -18,19 +18,19 @@ import java.util.Iterator;
  * Time: 10:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileReader {
+public class DataFileReader {
     private final Conf conf;
-    private final FileIndex fileIndex;
+    private final Index index;
     private final String tableName;
 
-    public FileReader(Conf conf, FileIndex fileIndex, String tableName) {
+    public DataFileReader(Conf conf, Index index, String tableName) {
         this.conf = conf;
-        this.fileIndex = fileIndex;
+        this.index = index;
         this.tableName = tableName;
     }
 
-    public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, FileIndexEntry possibleHit) throws IOException {
-        long position = fileIndex.getStartingIndexInFileForScan(inclStart, possibleHit);
+    public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, Index.Entry possibleHit) throws IOException {
+        long position = index.getStartingIndexInFileForScan(inclStart, possibleHit);
         String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
         return new ScanIterable(fileLocation, possibleHit.getFileTimestamp(), position, inclStart, exclStop);
     }

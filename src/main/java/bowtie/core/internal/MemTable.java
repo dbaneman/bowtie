@@ -19,14 +19,14 @@ import java.util.*;
 public class MemTable implements TableReader, TableWriter {
     private NavigableMap<byte[], byte[]> map;
     private final Conf conf;
-    private final FileIndex fileIndex;
+    private final Index index;
     private long size;
     private String name;
 
-    public MemTable(final Conf conf, final FileIndex fileIndex, final String name) {
+    public MemTable(final Conf conf, final Index index, final String name) {
         this.conf = conf;
         this.name = name;
-        this.fileIndex = fileIndex;
+        this.index = index;
         map = newMap();
         size = 0;
     }
@@ -123,7 +123,7 @@ public class MemTable implements TableReader, TableWriter {
         }
 
         // flush map to file
-        FileIndexEntry fileIndexEntry = createFileIndexEntry();
+        Index.Entry fileIndexEntry = createFileIndexEntry();
         OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir(getName()) + fileIndexEntry.getFileName()));
         long currentSize = 0;
         byte[] currentEntryBytes;
@@ -144,13 +144,13 @@ public class MemTable implements TableReader, TableWriter {
         fileOutputStream.close();
 
         // update file index
-        fileIndex.addEntry(fileIndexEntry);
+        index.addEntry(fileIndexEntry);
 
         // clear memtable
         map.clear();
     }
 
-    private FileIndexEntry createFileIndexEntry() {
+    private Index.Entry createFileIndexEntry() {
         Long timestampForFile;
         String fileName;
         File file;
@@ -159,7 +159,7 @@ public class MemTable implements TableReader, TableWriter {
             fileName = getConf().getDataDir(getName()) + "/" + timestampForFile;
             file = new File(fileName);
         } while (file.exists());
-        return new FileIndexEntry(timestampForFile);
+        return new Index.Entry(timestampForFile);
     }
 
     private byte[] encodeEntry(Map.Entry<byte[], byte[]> entry) {
