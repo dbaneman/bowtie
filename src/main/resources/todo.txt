@@ -4,9 +4,9 @@ x- implement update (in-memory, latest value wins because that's how Maps work; 
 x--> make sure ChainedIterables are sorted (merge sort style) when needed
 x- think about interaction between scans and updates/deletes. when we're picking off the front of multiple sources, we need to make sure we're taking the latest timestamp first. and then if we see that value after, we need to ignore it. so we should always be storing the most recent value read.
 x- let's not have the file index overwrite entries with the same start key
-- make sure file index is persisted
-- test basic persistence (restart)
-- clean up conf
+x- make sure file index is persisted
+x- test basic persistence (restart)
+x- clean up conf
 - compaction (key is that they shouldn't be overlapping)
 - bloom filters
 - add pools for getting tables
@@ -16,6 +16,7 @@ x- let's not have the file index overwrite entries with the same start key
 --> clear log after flush to disk
 --> shutdown/close should flush memstore
 --> implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
+- add compression?
 
  Distributed:
  - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)

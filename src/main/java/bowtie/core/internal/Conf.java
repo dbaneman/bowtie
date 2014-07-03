@@ -14,9 +14,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Conf {
-
-    public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-size-in-bytes";
     public static final String HOME_DIR = "bowtie.home-dir";
+    public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-bytes";
     public static final String BYTES_BETWEEN_INDEXED_KEYS = "bowtie.bytes-between-indexed-keys";
 
     private final Config config;
