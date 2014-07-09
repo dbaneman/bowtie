@@ -1,6 +1,5 @@
 package bowtie.core.internal;
 
-import bowtie.core.CompactionType;
 import bowtie.core.Result;
 import bowtie.core.Table;
 import bowtie.core.TableReader;
@@ -42,10 +41,20 @@ public class TableImpl implements Table, TableReader {
         if (open) {
             throw new TableAlreadyOpenException(getName());
         }
-        final Index index = new Index(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
+        final Index index = Index.forFile(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
         memTable = new MemTable(conf, index, name);
         fsTable = new FSTable(conf, index, new DataFileReader(conf, index, name));
         open = true;
+    }
+
+    @Override
+    public void compactMinor() throws IOException {
+        fsTable.compactMinor();
+    }
+
+    @Override
+    public void compactMajor() throws IOException {
+        fsTable.compactMajor();
     }
 
     public Conf getConf() {
@@ -138,20 +147,5 @@ public class TableImpl implements Table, TableReader {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public void beginCompaction(CompactionType compactionType, boolean ignoreSilentlyIfAlreadyCompacting) throws IOException {
-        fsTable.beginCompaction(compactionType, ignoreSilentlyIfAlreadyCompacting);
-    }
-
-    @Override
-    public void waitUntilCompactionComplete() throws InterruptedException {
-        fsTable.waitUntilCompactionComplete();
-    }
-
-    @Override
-    public void waitUntilCompactionComplete(long timeout) throws InterruptedException {
-        fsTable.waitUntilCompactionComplete(timeout);
     }
 }

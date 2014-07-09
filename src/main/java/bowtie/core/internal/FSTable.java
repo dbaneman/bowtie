@@ -1,6 +1,5 @@
 package bowtie.core.internal;
 
-import bowtie.core.CompactionType;
 import bowtie.core.Result;
 import bowtie.core.TableReader;
 import bowtie.core.internal.util.MergedIterable;
@@ -19,7 +18,7 @@ import java.util.List;
  */
 public class FSTable implements TableReader {
     private final Conf conf;
-    private final Index index;
+    private Index index;
     private final DataFileReader dataFileReader;
 
     public FSTable(final Conf conf, final Index index, final DataFileReader dataFileReader) {
@@ -54,36 +53,13 @@ public class FSTable implements TableReader {
         index.close();
     }
 
-    public void beginCompaction(CompactionType compactionType, boolean ignoreSilentlyIfAlreadyCompacting) throws IOException {
-        switch (compactionType) {
-            case MAJOR :
-                beginMajorCompaction();
-                break;
-            case MINOR :
-                beginMinorCompaction();
-                break;
-            default :
-                break;
-        }
-
-        // TODO: make this run in a separate thread; then the wait/notify stuff will become relevant
-        notifyAll();
+    public void compactMinor() throws IOException {
+        index.compactMinor();
     }
 
-    private void beginMajorCompaction() {
-
+    public void compactMajor() throws IOException {
+        final List<Index.Entry> compactedEntries = index.compact(index.getAllEntries());
+        index.rewriteIndexFile(compactedEntries);
+        index = Index.forFile(index.getFilePath());
     }
-
-    private void beginMinorCompaction() {
-
-    }
-
-    public void waitUntilCompactionComplete() throws InterruptedException {
-        wait();
-    }
-
-    public void waitUntilCompactionComplete(long timeout) throws InterruptedException {
-        wait(timeout);
-    }
-
 }

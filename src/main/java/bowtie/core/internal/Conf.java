@@ -17,6 +17,7 @@ public class Conf {
     public static final String HOME_DIR = "bowtie.home-dir";
     public static final String MAX_MEM_STORE_SIZE = "bowtie.mem-table-max-bytes";
     public static final String BYTES_BETWEEN_INDEXED_KEYS = "bowtie.bytes-between-indexed-keys";
+    public static final String MAX_DATA_FILE_SIZE = "bowtie.data-file-max-bytes";
 
     private final Config config;
     private final Map<String, Object> parameterCache;

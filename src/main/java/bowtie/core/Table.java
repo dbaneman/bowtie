@@ -14,12 +14,7 @@ public interface Table extends TableReader, TableWriter {
     void drop() throws IOException;
     String getName();
     boolean exists();
-
     void open() throws IOException;
-
-    void beginCompaction(CompactionType compactionType, boolean ignoreSilentlyIfAlreadyCompacting) throws IOException;
-
-    void waitUntilCompactionComplete() throws InterruptedException;
-
-    void waitUntilCompactionComplete(long timeout) throws InterruptedException;
+    void compactMinor() throws IOException;
+    void compactMajor() throws IOException;
 }

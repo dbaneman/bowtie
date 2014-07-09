@@ -159,7 +159,7 @@ public class MemTable implements TableReader, TableWriter {
             fileName = getConf().getDataDir(getName()) + "/" + timestampForFile;
             file = new File(fileName);
         } while (file.exists());
-        return new Index.Entry(timestampForFile);
+        return new Index.Entry(timestampForFile, false);
     }
 
     private byte[] encodeEntry(Map.Entry<byte[], byte[]> entry) {

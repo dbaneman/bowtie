@@ -17,6 +17,16 @@ x- clean up conf
 --> shutdown/close should flush memstore
 --> implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
 - add compression?
+- add backwards scan
 
  Distributed:
  - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)
+
+ sources:
+ https://www.igvita.com/2012/02/06/sstable-and-log-structured-storage-leveldb/
+
+ Notes on compaction approach:
+        let's have two levels, L0 and L1.
+             for a minor compaction, we'll just merge-sort L0. this leaves us with potentially overlapping files wrt L1, but we don't have to rewrite the whole db
+             for a major compaction, first merge-sort L0 and then we merge-sort the whole db.
+             for major compactions, we're going to need to decide ahead of time how many files our output db should be and what the cutoffs should be. based on our key indexes, we should roughly be able to figure this out.
