@@ -164,12 +164,12 @@ public class Index {
     }
 
     /**
-     * Find the data files associated with the provided index  entries. Merge the data files into a set of new (smaller,
+     * Find the data files associated with the provided index  entries. Merge the data files into a set of new (fewer,
      * larger) files with no overlapping keys. Then delete the original data files. Return the index entries for the new
      * data files.
      */
     public List<Entry> compact(final List<Entry> inputEntries) throws IOException {
-        // TODO
+        // TODO: implement! We'll almost certainly want to factor out common code between this method and MemTable.flush()
         throw new RuntimeException("implement me!");
     }
 
