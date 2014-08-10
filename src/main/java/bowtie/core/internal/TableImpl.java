@@ -41,9 +41,9 @@ public class TableImpl implements Table, TableReader {
         if (open) {
             throw new TableAlreadyOpenException(getName());
         }
-        final Index index = Index.forFile(getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
+        final Index index = Index.forFile(conf, name, getConf().getDataDir(getName()) + INDEX_FILE_LOCAL_NAME);
         memTable = new MemTable(conf, index, name);
-        fsTable = new FSTable(conf, index, new DataFileReader(conf, index, name));
+        fsTable = new FSTable(conf, name, index, new DataFileReader(conf, index, name));
         open = true;
     }
 

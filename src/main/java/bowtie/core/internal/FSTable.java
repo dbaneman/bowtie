@@ -18,17 +18,23 @@ import java.util.List;
  */
 public class FSTable implements TableReader {
     private final Conf conf;
+    private final String tableName;
     private Index index;
     private final DataFileReader dataFileReader;
 
-    public FSTable(final Conf conf, final Index index, final DataFileReader dataFileReader) {
+    public FSTable(final Conf conf, final String tableName, final Index index, final DataFileReader dataFileReader) {
         this.conf = conf;
+        this.tableName = tableName;
         this.index = index;
         this.dataFileReader = dataFileReader;
     }
 
     public Conf getConf() {
         return conf;
+    }
+
+    public String getName() {
+        return tableName;
     }
 
     @Override
@@ -60,6 +66,6 @@ public class FSTable implements TableReader {
     public void compactMajor() throws IOException {
         final List<Index.Entry> compactedEntries = index.compact(index.getAllEntries());
         index.rewriteIndexFile(compactedEntries);
-        index = Index.forFile(index.getFilePath());
+        index = Index.forFile(getConf(), getName(), index.getFilePath());
     }
 }

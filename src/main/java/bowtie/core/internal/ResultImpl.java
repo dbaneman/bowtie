@@ -57,6 +57,11 @@ public class ResultImpl implements Result {
     }
 
     @Override
+    public byte[] setValue(byte[] value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean noVal() {
         return value == null;
     }

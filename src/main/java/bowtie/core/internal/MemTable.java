@@ -4,9 +4,9 @@ import bowtie.core.Result;
 import bowtie.core.TableReader;
 import bowtie.core.TableWriter;
 import bowtie.core.internal.util.ByteUtils;
+import bowtie.core.internal.util.DataWriterUtil;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -123,60 +123,15 @@ public class MemTable implements TableReader, TableWriter {
         }
 
         // flush map to file
-        Index.Entry fileIndexEntry = createFileIndexEntry();
-        OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(getConf().getDataDir(getName()) + fileIndexEntry.getFileName()));
-        long currentSize = 0;
-        byte[] currentEntryBytes;
-        fileIndexEntry.setStartKey(map.firstKey());
-        fileIndexEntry.setEndKey(map.lastKey());
-        for (Map.Entry<byte[], byte[]> entry : map.entrySet()) {
-            currentEntryBytes = encodeEntry(entry);
-            fileOutputStream.write(currentEntryBytes);
-            if (currentSize > getConf().getLong(Conf.BYTES_BETWEEN_INDEXED_KEYS)) {
-                fileIndexEntry.addIndexedKey(entry.getKey(), currentSize);
-                currentSize = 0;
-            }
-            currentSize += currentEntryBytes.length;
-        }
-
-        // write EOF byte and close file
-        fileOutputStream.write(ByteBuffer.allocate(ByteUtils.SIZE_DESCRIPTOR_LENGTH).putShort(ByteUtils.END_OF_FILE).array());
-        fileOutputStream.close();
+        final List<Index.Entry> fileIndexEntries = DataWriterUtil.writeDataFilesAndCreateIndexEntries(getConf(), getName(), map.entrySet());
 
         // update file index
-        index.addEntry(fileIndexEntry);
+        for (final Index.Entry fileIndexEntry : fileIndexEntries) {
+            index.addEntry(fileIndexEntry);
+        }
 
         // clear memtable
         map.clear();
-    }
-
-    private Index.Entry createFileIndexEntry() {
-        Long timestampForFile;
-        String fileName;
-        File file;
-        do {
-            timestampForFile = System.currentTimeMillis();
-            fileName = getConf().getDataDir(getName()) + "/" + timestampForFile;
-            file = new File(fileName);
-        } while (file.exists());
-        return new Index.Entry(timestampForFile, false);
-    }
-
-    private byte[] encodeEntry(Map.Entry<byte[], byte[]> entry) {
-        int valueLength = entry.getValue() == null
-                ? 0
-                : entry.getValue().length;
-        int sizeOfEntry = ByteUtils.SIZE_DESCRIPTOR_LENGTH + entry.getKey().length + ByteUtils.SIZE_DESCRIPTOR_LENGTH + valueLength;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(sizeOfEntry);
-        byteBuffer.putShort((short) entry.getKey().length);
-        byteBuffer.put(entry.getKey());
-        if (entry.getValue() == null) {
-            byteBuffer.putShort(ByteUtils.DELETED_VALUE);
-        } else {
-            byteBuffer.putShort((short) entry.getValue().length);
-            byteBuffer.put(entry.getValue());
-        }
-        return byteBuffer.array();
     }
 
     public String getName() {

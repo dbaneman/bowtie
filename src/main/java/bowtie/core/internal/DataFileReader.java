@@ -2,13 +2,8 @@ package bowtie.core.internal;
 
 import bowtie.core.Result;
 import bowtie.core.internal.util.ByteUtils;
-import bowtie.core.internal.util.ReadAheadIterator;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -29,73 +24,59 @@ public class DataFileReader {
         this.tableName = tableName;
     }
 
-    public Iterable<Result> scanInFile(byte[] inclStart, byte[] exclStop, Index.Entry possibleHit) throws IOException {
-        long position = index.getStartingIndexInFileForScan(inclStart, possibleHit);
-        String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
-        return new ScanIterable(fileLocation, possibleHit.getFileTimestamp(), position, inclStart, exclStop);
+    public Iterable<Result> scanInFile(final byte[] inclStart, final byte[] exclStop, final Index.Entry possibleHit) throws IOException {
+        final long position = index.getStartingIndexInFileForScan(inclStart, possibleHit);
+        final String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
+        return new Iterable<Result>() {
+            @Override
+            public Iterator<Result> iterator() {
+                try {
+                    return new ScanIterator(fileLocation, possibleHit.getFileTimestamp(), position, inclStart, exclStop);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     public Conf getConf() {
         return conf;
     }
 
-    private static class ScanIterable implements Iterable<Result> {
-        private final InputStream fileInputStream;
+    private static class ScanIterator extends ResultIterator {
         private final byte[] inclStart;
         private final byte[] exclStop;
-        private final long fileTimestamp;
 
-        public ScanIterable(final String fileLocation, final long fileTimestamp, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
-            this.fileTimestamp = fileTimestamp;
-            this.fileInputStream = new BufferedInputStream(new FileInputStream(fileLocation));
+        public ScanIterator(final String fileLocation, final long fileTimestamp, final long startPosition, final byte[] inclStart, final byte[] exclStop) throws IOException {
+            super(fileLocation, fileTimestamp);
             this.inclStart = inclStart;
             this.exclStop = exclStop;
             fileInputStream.skip(startPosition);
         }
 
+
         @Override
-        public Iterator<Result> iterator() {
-            return new ReadAheadIterator<Result>() {
+        protected Result readAhead() throws Exception {
+            Result result;
+            do {
+                result = super.readAhead();
+            } while (result!=null && !((ResultImpl) result).isDeleted() && ByteUtils.compare(key, inclStart) < 0);
+            if (result == null) {
+                return null;
+            }
+            if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || (exclStop!=null && ByteUtils.compare(key, exclStop) >= 0)) {
+                return null;
+            }
+            return result;
+        }
 
-                @Override
-                protected Result readAhead() throws Exception {
-                    byte[] key;
-                    byte[] value;
-                    byte[] length;
-                    do {
-                        length = new byte[ByteUtils.SIZE_DESCRIPTOR_LENGTH];
-                        fileInputStream.read(length);
-                        short keyLength = ByteBuffer.wrap(length).getShort();
-                        if (keyLength == ByteUtils.END_OF_FILE) {
-                            return null;
-                        }
-                        key = new byte[keyLength];
-                        fileInputStream.read(key);
-                        length = new byte[ByteUtils.SIZE_DESCRIPTOR_LENGTH];
-                        fileInputStream.read(length);
-                        short valueLength = ByteBuffer.wrap(length).getShort();
-                        if (valueLength == ByteUtils.DELETED_VALUE) {
-                            value = null;
-                            continue;
-                        }
-                        value = new byte[valueLength];
-                        fileInputStream.read(value);
-                    } while (ByteUtils.compare(key, inclStart) < 0);
-                    if ((exclStop==null && ByteUtils.compare(key, inclStart)!=0) || (exclStop!=null && ByteUtils.compare(key, exclStop) >= 0)) {
-                        return null;
-                    }
-                    return new ResultImpl(key, value, fileTimestamp);
-                }
-
-                @Override
-                protected void onEnd() {
-                    try {
-                        fileInputStream.close();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            };
+        @Override
+        protected void onEnd() {
+            try {
+                fileInputStream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

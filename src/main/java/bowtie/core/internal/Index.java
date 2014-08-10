@@ -1,6 +1,9 @@
 package bowtie.core.internal;
 
+import bowtie.core.Result;
 import bowtie.core.internal.util.ByteUtils;
+import bowtie.core.internal.util.DataWriterUtil;
+import bowtie.core.internal.util.MergedIterable;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -18,18 +21,30 @@ public class Index {
     private final Set<byte[]> uncompactedEntries;
     private final OutputStream indexFileWriter;
     private final String filePath;
+    private final String tableName;
+    private final Conf conf;
 
-    public static Index forFile(final String indexFileAbsolutePath) throws IOException {
+    public String getName() {
+        return tableName;
+    }
+
+    public Conf getConf() {
+        return conf;
+    }
+
+    public static Index forFile(final Conf conf, final String tableName, final String indexFileAbsolutePath) throws IOException {
         File indexFile = new File(indexFileAbsolutePath);
         if (!indexFile.exists()) {
             indexFile = new File(indexFileAbsolutePath + ".bak"); // in case we hit an error while rewriting the index
         }
         return indexFile.exists()
-                ? fromFile(indexFile)
-                : new Index(newMap(), newSet(), indexFile, indexFileAbsolutePath);
+                ? fromFile(conf, tableName, indexFile)
+                : new Index(conf, tableName, newMap(), newSet(), indexFile, indexFileAbsolutePath);
     }
 
-    private Index(final NavigableMap<byte[], List<Entry>> map, final Set<byte[]> uncompactedEntries, final File indexFile, final String filePath) throws IOException {
+    private Index(final Conf conf, final String tableName, final NavigableMap<byte[], List<Entry>> map, final Set<byte[]> uncompactedEntries, final File indexFile, final String filePath) throws IOException {
+        this.conf = conf;
+        this.tableName = tableName;
         this.map = map;
         this.uncompactedEntries = uncompactedEntries;
         this.indexFileWriter = new BufferedOutputStream(FileUtils.openOutputStream(indexFile, true));
@@ -44,7 +59,7 @@ public class Index {
         return new TreeSet<byte[]>(ByteUtils.COMPARATOR);
     }
 
-    private static Index fromFile(final File indexFile) throws IOException {
+    private static Index fromFile(final Conf conf, final String tableName, final File indexFile) throws IOException {
         final InputStream inputStream = new BufferedInputStream(new FileInputStream(indexFile));
         final NavigableMap<byte[], List<Entry>> map= newMap();
         final Set<byte[]> uncompactedEntries = newSet();
@@ -53,7 +68,7 @@ public class Index {
             addEntryToMap(map, uncompactedEntries, entry);
         }
         inputStream.close();
-        return new Index(map, uncompactedEntries, indexFile, indexFile.getAbsolutePath());
+        return new Index(conf, tableName, map, uncompactedEntries, indexFile, indexFile.getAbsolutePath());
     }
 
     public void addEntry(Entry entry) throws IOException {
@@ -169,8 +184,12 @@ public class Index {
      * data files.
      */
     public List<Entry> compact(final List<Entry> inputEntries) throws IOException {
-        // TODO: implement! We'll almost certainly want to factor out common code between this method and MemTable.flush()
-        throw new RuntimeException("implement me!");
+        final List<Iterable<Result>> resultIterables = new ArrayList<Iterable<Result>>();
+        for (final Entry inputEntry : inputEntries) {
+            resultIterables.add(ResultIterator.asIterable(inputEntry.getFileName(), inputEntry.getFileTimestamp()));
+        }
+        final MergedIterable<Result> mergedIterable = new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, resultIterables, true);
+        return DataWriterUtil.writeDataFilesAndCreateIndexEntries(getConf(), getName(), mergedIterable);
     }
 
     public String getFilePath() {
