@@ -1,13 +1,4 @@
-Local:
-x- implement delete (we can say that value length of -2 means it's deleted. on compaction we can just eliminate that record entirely.)
-x- implement update (in-memory, latest value wins because that's how Maps work; from disk, value with latest file timestamp wins)
-x--> make sure ChainedIterables are sorted (merge sort style) when needed
-x- think about interaction between scans and updates/deletes. when we're picking off the front of multiple sources, we need to make sure we're taking the latest timestamp first. and then if we see that value after, we need to ignore it. so we should always be storing the most recent value read.
-x- let's not have the file index overwrite entries with the same start key
-x- make sure file index is persisted
-x- test basic persistence (restart)
-x- clean up conf
-- compaction (key is that they shouldn't be overlapping)
+- write tests for compaction
 - bloom filters
 - add pools for getting tables
 - figure out concurrency and thread safety!
@@ -16,11 +7,8 @@ x- clean up conf
 --> clear log after flush to disk
 --> shutdown/close should flush memstore
 --> implement recovery using logs (i.e. on restart, if we have a log that hasn't been properly flushed yet, flush it to disk)
-- add compression?
+- add compression
 - add backwards scan
-
- Distributed:
- - raft? need to do a bit more research (BigTable uses Paxos, so hopefully can do something similar)
 
  sources:
  https://www.igvita.com/2012/02/06/sstable-and-log-structured-storage-leveldb/
@@ -29,4 +17,3 @@ x- clean up conf
         let's have two levels, L0 and L1.
              for a minor compaction, we'll just merge-sort L0. this leaves us with potentially overlapping files wrt L1, but we don't have to rewrite the whole db
              for a major compaction, first merge-sort L0 and then we merge-sort the whole db.
-             for major compactions, we're going to need to decide ahead of time how many files our output db should be and what the cutoffs should be. based on our key indexes, we should roughly be able to figure this out.
