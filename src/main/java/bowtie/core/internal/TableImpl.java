@@ -21,8 +21,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class TableImpl implements Table, TableReader {
-    private static final Object INDEX_FILE_LOCAL_NAME = "index";
-
+    private static final String INDEX_FILE_LOCAL_NAME = "index";
     private final Conf conf;
     private MemTable memTable;
     private FSTable fsTable;

@@ -35,10 +35,6 @@ public class MemTable implements TableReader, TableWriter {
         return new TreeMap<byte[], byte[]>(ByteUtils.COMPARATOR);
     }
 
-    public Conf getConf() {
-        return conf;
-    }
-
     @Override
     public Iterable<Result> scan(byte[] inclStart, byte[] exclStop) {
         return scan(inclStart, exclStop, map);
@@ -113,7 +109,7 @@ public class MemTable implements TableReader, TableWriter {
     }
 
     public boolean isFull() {
-        return size >= getConf().getLong(Conf.MAX_MEM_STORE_SIZE);
+        return size >= conf.getLong(Conf.MAX_MEM_STORE_SIZE);
     }
 
     @Override
@@ -123,7 +119,7 @@ public class MemTable implements TableReader, TableWriter {
         }
 
         // flush map to file
-        final List<Index.Entry> fileIndexEntries = DataWriterUtil.writeDataFilesAndCreateIndexEntries(getConf(), getName(), map.entrySet());
+        final List<Index.Entry> fileIndexEntries = DataWriterUtil.writeDataFilesAndCreateIndexEntries(conf, name, map.entrySet());
 
         // update file index
         for (final Index.Entry fileIndexEntry : fileIndexEntries) {
@@ -134,7 +130,4 @@ public class MemTable implements TableReader, TableWriter {
         map.clear();
     }
 
-    public String getName() {
-        return name;
-    }
 }

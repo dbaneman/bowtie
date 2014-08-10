@@ -29,14 +29,6 @@ public class FSTable implements TableReader {
         this.dataFileReader = dataFileReader;
     }
 
-    public Conf getConf() {
-        return conf;
-    }
-
-    public String getName() {
-        return tableName;
-    }
-
     @Override
     public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
         final List<Iterable<Result>> possibleHitIterables = new ArrayList<Iterable<Result>>();
@@ -66,6 +58,6 @@ public class FSTable implements TableReader {
     public void compactMajor() throws IOException {
         final List<Index.Entry> compactedEntries = index.compact(index.getAllEntries());
         index.rewriteIndexFile(compactedEntries);
-        index = Index.forFile(getConf(), getName(), index.getFilePath());
+        index = Index.forFile(conf, tableName, index.getFilePath());
     }
 }

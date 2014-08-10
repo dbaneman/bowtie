@@ -24,14 +24,6 @@ public class Index {
     private final String tableName;
     private final Conf conf;
 
-    public String getName() {
-        return tableName;
-    }
-
-    public Conf getConf() {
-        return conf;
-    }
-
     public static Index forFile(final Conf conf, final String tableName, final String indexFileAbsolutePath) throws IOException {
         File indexFile = new File(indexFileAbsolutePath);
         if (!indexFile.exists()) {
@@ -189,7 +181,7 @@ public class Index {
             resultIterables.add(ResultIterator.asIterable(inputEntry.getFileName(), inputEntry.getFileTimestamp()));
         }
         final MergedIterable<Result> mergedIterable = new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, resultIterables, true);
-        return DataWriterUtil.writeDataFilesAndCreateIndexEntries(getConf(), getName(), mergedIterable);
+        return DataWriterUtil.writeDataFilesAndCreateIndexEntries(conf, tableName, mergedIterable);
     }
 
     public String getFilePath() {

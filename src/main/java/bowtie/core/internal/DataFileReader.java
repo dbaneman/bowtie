@@ -26,7 +26,7 @@ public class DataFileReader {
 
     public Iterable<Result> scanInFile(final byte[] inclStart, final byte[] exclStop, final Index.Entry possibleHit) throws IOException {
         final long position = index.getStartingIndexInFileForScan(inclStart, possibleHit);
-        final String fileLocation = getConf().getDataDir(tableName) + possibleHit.getFileName();
+        final String fileLocation = conf.getDataDir(tableName) + possibleHit.getFileName();
         return new Iterable<Result>() {
             @Override
             public Iterator<Result> iterator() {
@@ -37,10 +37,6 @@ public class DataFileReader {
                 }
             }
         };
-    }
-
-    public Conf getConf() {
-        return conf;
     }
 
     private static class ScanIterator extends ResultIterator {
