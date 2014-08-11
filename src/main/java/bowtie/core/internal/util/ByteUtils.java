@@ -1,5 +1,7 @@
 package bowtie.core.internal.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -41,6 +43,14 @@ public class ByteUtils {
             sb.append(next).append("\n");
         }
         return sb.toString();
+    }
+
+    public static void main(String[] args) throws Exception {
+        File dataDir = new File("/opt/bowtie/internal_test/");
+        for (File f : dataDir.listFiles()) {
+            InputStream inputStream = new FileInputStream(f);
+            System.out.println(writeBytes(inputStream));
+        }
     }
 
 }

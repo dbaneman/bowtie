@@ -44,7 +44,7 @@ public class DataWriterUtil {
             currentEntryBytes = encodeEntry(record);
             fileOutputStream.write(currentEntryBytes);
             if (bytesSinceLastPosIndex > bytesBetweenIndexedKeys) {
-                fileIndexEntry.addIndexedKey(record.getKey(), bytesSinceLastPosIndex);
+                fileIndexEntry.addIndexedKey(record.getKey(), currentSizeTotal);
                 bytesSinceLastPosIndex = 0;
             }
             bytesSinceLastPosIndex += currentEntryBytes.length;

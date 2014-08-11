@@ -17,7 +17,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TableImplTest {
-    private static final String TEST_TABLE_NAME = "internal_test";
+    public static final String TEST_TABLE_NAME = "internal_test";
     TableImpl table;
     byte[] key = new byte[]{1, 2};
     byte[] key2 = new byte[]{2, 3, 4, 5, 7, 7, 8};

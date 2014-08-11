@@ -24,7 +24,7 @@ public class TableImpl implements Table, TableReader {
     private static final String INDEX_FILE_LOCAL_NAME = "index";
     private final Conf conf;
     private MemTable memTable;
-    private FSTable fsTable;
+    FSTable fsTable;
     private final String name;
     private File tableDir;
     private boolean open = false;

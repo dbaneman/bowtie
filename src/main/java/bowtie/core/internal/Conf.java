@@ -62,6 +62,10 @@ public class Conf {
         return (Boolean) parameterCache.get(parameter);
     }
 
+    public void set(String parameter, Object value) {
+        parameterCache.put(parameter, value);
+    }
+
     private void cacheIfNotCached(String parameter) {
         if (!parameterCache.containsKey(parameter) && config.hasPath(parameter)) {
             parameterCache.put(parameter, config.getValue(parameter).unwrapped());

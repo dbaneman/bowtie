@@ -26,9 +26,6 @@ public class Index {
 
     public static Index forFile(final Conf conf, final String tableName, final String indexFileAbsolutePath) throws IOException {
         File indexFile = new File(indexFileAbsolutePath);
-        if (!indexFile.exists()) {
-            indexFile = new File(indexFileAbsolutePath + ".bak"); // in case we hit an error while rewriting the index
-        }
         return indexFile.exists()
                 ? fromFile(conf, tableName, indexFile)
                 : new Index(conf, tableName, newMap(), newSet(), indexFile, indexFileAbsolutePath);
@@ -84,7 +81,7 @@ public class Index {
         }
         entries.add(entry);
         map.put(entry.getStartKey(), entries);
-        if (entry.hasBeenCompacted()) {
+        if (!entry.hasBeenCompacted()) {
             uncompactedEntries.add(entry.getStartKey());
         }
     }
@@ -178,7 +175,7 @@ public class Index {
     public List<Entry> compact(final List<Entry> inputEntries) throws IOException {
         final List<Iterable<Result>> resultIterables = new ArrayList<Iterable<Result>>();
         for (final Entry inputEntry : inputEntries) {
-            resultIterables.add(ResultIterator.asIterable(inputEntry.getFileName(), inputEntry.getFileTimestamp()));
+            resultIterables.add(ResultIterator.asIterable(conf.getDataDir(tableName) + "/" + inputEntry.getFileName(), inputEntry.getFileTimestamp()));
         }
         final MergedIterable<Result> mergedIterable = new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, resultIterables, true);
         return DataWriterUtil.writeDataFilesAndCreateIndexEntries(conf, tableName, mergedIterable);
