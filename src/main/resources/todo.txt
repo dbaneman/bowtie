@@ -1,3 +1,4 @@
+- add comments
 - remove (instead of just marking as deleted) deleted values during major compaction
 - bloom filters
 - add pools for getting tables
