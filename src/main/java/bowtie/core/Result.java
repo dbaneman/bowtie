@@ -10,5 +10,11 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface Result extends Map.Entry<byte[], byte[]> {
+    @Override
+    byte[] getKey();
+
+    @Override
+    byte[] getValue();
+
     boolean noVal();
 }

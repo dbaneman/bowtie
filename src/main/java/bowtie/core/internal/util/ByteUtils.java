@@ -1,5 +1,6 @@
 package bowtie.core.internal.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -34,13 +35,21 @@ public class ByteUtils {
         }
     };
 
-    public static String writeBytes(InputStream bytes) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        int next;
-        while ((next=bytes.read()) != -1) {
-            sb.append(next).append("\n");
+    public static String writeBytes(InputStream bytes, String separator) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            int next;
+            while ((next = bytes.read()) != -1) {
+                sb.append(next).append(separator);
+            }
+            return sb.toString();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
-        return sb.toString();
+    }
+
+    public static String writeBytes(byte[] bytes, String separator) {
+        return writeBytes(new ByteArrayInputStream(bytes), separator);
     }
 
 }

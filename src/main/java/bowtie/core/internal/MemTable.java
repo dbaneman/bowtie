@@ -1,12 +1,10 @@
 package bowtie.core.internal;
 
 import bowtie.core.Result;
-import bowtie.core.TableReader;
-import bowtie.core.TableWriter;
 import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.DataWriterUtil;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -16,7 +14,7 @@ import java.util.*;
  * Time: 8:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MemTable implements TableReader, TableWriter {
+public class MemTable {
     private NavigableMap<byte[], byte[]> map;
     private final Conf conf;
     private final Index index;
@@ -35,12 +33,10 @@ public class MemTable implements TableReader, TableWriter {
         return new TreeMap<byte[], byte[]>(ByteUtils.COMPARATOR);
     }
 
-    @Override
     public Iterable<Result> scan(byte[] inclStart, byte[] exclStop) {
         return scan(inclStart, exclStop, map);
     }
 
-    @Override
     public Result get(byte[] key) throws IOException {
         if (key == null) {
             throw new NullPointerException("Attempted to get a null key.");
@@ -51,7 +47,6 @@ public class MemTable implements TableReader, TableWriter {
         return new ResultImpl(key, value, ResultImpl.MEM_TIMESTAMP, isDeleted);
     }
 
-    @Override
     public void close() throws IOException {
         flush();
     }
@@ -82,7 +77,6 @@ public class MemTable implements TableReader, TableWriter {
         };
     }
 
-    @Override
     public void put(byte[] key, byte[] value) {
         if (key == null) {
             throw new NullPointerException("Attempted to put a null key.");
@@ -94,7 +88,6 @@ public class MemTable implements TableReader, TableWriter {
         size += key.length + value.length;
     }
 
-    @Override
     public void delete(byte[] key) throws IOException {
         if (key == null) {
             throw new NullPointerException("Attempted to delete a null key.");
@@ -112,7 +105,6 @@ public class MemTable implements TableReader, TableWriter {
         return size >= conf.getLong(Conf.MAX_MEM_STORE_SIZE);
     }
 
-    @Override
     public void flush() throws IOException {
         if (map.isEmpty()) {
             return;

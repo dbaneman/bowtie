@@ -1,7 +1,6 @@
 package bowtie.core.internal;
 
 import bowtie.core.Result;
-import bowtie.core.TableReader;
 import bowtie.core.internal.util.MergedIterable;
 import org.apache.commons.io.FileUtils;
 
@@ -16,7 +15,7 @@ import java.util.*;
  * Time: 9:02 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FSTable implements TableReader {
+public class FSTable {
     private final Conf conf;
     private final String tableName;
     Index index;
@@ -29,7 +28,6 @@ public class FSTable implements TableReader {
         this.dataFileReader = dataFileReader;
     }
 
-    @Override
     public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
         final List<Iterable<Result>> possibleHitIterables = new ArrayList<Iterable<Result>>();
         for (final Index.Entry possibleHit : index.getFilesPossiblyContainingKeyRange(inclStart, exclStop)) {
@@ -38,7 +36,6 @@ public class FSTable implements TableReader {
         return new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, possibleHitIterables);
     }
 
-    @Override
     public Result get(final byte[] key) throws IOException {
         final Iterator<Result> scanHits = scan(key, null).iterator();
         return scanHits.hasNext()
@@ -46,7 +43,6 @@ public class FSTable implements TableReader {
                 : new ResultImpl(key, null, ResultImpl.LATEST_FS_TIMESTAMP);
     }
 
-    @Override
     public void close() throws IOException {
         index.close();
     }

@@ -2,11 +2,8 @@ package bowtie.core.internal;
 
 import bowtie.core.Result;
 import bowtie.core.Table;
-import bowtie.core.TableReader;
-import bowtie.core.exceptions.ClosedTableException;
-import bowtie.core.exceptions.TableAlreadyExistsException;
-import bowtie.core.exceptions.TableAlreadyOpenException;
-import bowtie.core.exceptions.TableDoesNotExistException;
+import bowtie.core.exceptions.*;
+import bowtie.core.internal.util.ByteUtils;
 import bowtie.core.internal.util.MergedIterable;
 import org.apache.commons.io.FileUtils;
 
@@ -20,7 +17,7 @@ import java.io.IOException;
  * Time: 8:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TableImpl implements Table, TableReader {
+public class TableImpl implements Table {
     private static final String INDEX_FILE_LOCAL_NAME = "index";
     private final Conf conf;
     private MemTable memTable;
@@ -47,6 +44,11 @@ public class TableImpl implements Table, TableReader {
     }
 
     @Override
+    public boolean isOpen() {
+        return open;
+    }
+
+    @Override
     public void compactMinor() throws IOException {
         fsTable.compactMinor();
     }
@@ -56,6 +58,7 @@ public class TableImpl implements Table, TableReader {
         fsTable.compactMajor();
     }
 
+    @Override
     public Conf getConf() {
         return conf;
     }
@@ -129,9 +132,16 @@ public class TableImpl implements Table, TableReader {
     }
 
     @Override
-    public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException {
+    public Iterable<Result> scan(final byte[] inclStart, final byte[] exclStop) throws IOException, InvalidScanParametersException {
         checkTableExistsAndOpen();
+        checkValidScan(inclStart, exclStop);
         return new MergedIterable<Result>(ResultImpl.KEY_BASED_RESULT_COMPARATOR, memTable.scan(inclStart, exclStop), fsTable.scan(inclStart, exclStop));
+    }
+
+    private static void checkValidScan(final byte[] inclStart, final byte[] exclStop) throws InvalidScanParametersException {
+        if (ByteUtils.compare(inclStart, exclStop) >= 0) {
+            throw new InvalidScanParametersException(inclStart, exclStop);
+        }
     }
 
     @Override
