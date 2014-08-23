@@ -6,7 +6,11 @@ A sorted key-value store indexed using a log-structured merge (LSM) tree. (For a
 2. An in-memory index of the data files (start key, end key, and periodic positions at a configurable interval)  
 3. A sorted in-memory table ("mem-table")  
 
-To allow fast sorting, all writes go to the in-memory table. (So writes are always fast, regardless of database size.) When the mem-table hits a configurable max size, it's flushed into a sorted data file. These data files are periodically "compacted" to minimize overlapping row ranges across data files. This means that reads only need to check the mem-table and a small number of "candidate" data files that include the key range specified by the read. Then, thanks to the index, the table can seek to the closest indexed position in each candidate data file. And of course, if you want to scan your data in-order (as with map/reduce style processing), then you're really in the sweet spot for an LSM tree database like bowtie. 
+To allow fast sorting, all writes go to the in-memory table. This means that writes are always fast, regardless of database size. When the mem-table hits a configurable max size, it's flushed into a sorted data file. 
+
+The data files are periodically "compacted" to minimize overlapping row ranges across data files. This means that reads only need to check the mem-table and a small number of "candidate" data files that include the key range specified by the read. And thanks to the index, the table can seek to the closest indexed position in each candidate data file. 
+
+Finally, if you want to scan your data in-order (as with map/reduce style processing), then you're really in the sweet spot for an LSM tree database like bowtie. 
 
 ## Configuration
 
@@ -74,7 +78,7 @@ In a hypothetical future release, compaction will run automatically on a backgro
     table.compactMajor(); // compact the whole database    
 
 ## Javadoc
-I hope to have the javadoc online soon. For now, you can clone the project and create the javadoc manually as shown below. Note that packages that live under "bowtie.core.internal" are for internal use only and shouldn't be used by client code.
+I hope to have the javadoc online soon. For now, you can clone the project and create the javadoc manually as shown below. Note that packages that live under "bowtie.core.internal" are for internal use only and shouldn't be used by client code; for this reason, they're excluded from the javadoc.
   
     cd ~/code/bowtie
     mvn javadoc:javadoc
