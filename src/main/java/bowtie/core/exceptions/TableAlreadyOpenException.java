@@ -1,11 +1,7 @@
 package bowtie.core.exceptions;
 
 /**
- * Created with IntelliJ IDEA.
- * User: dan
- * Date: 6/29/14
- * Time: 5:28 PM
- * To change this template use File | Settings | File Templates.
+ * Thrown if the user attempts to open a table that is already open.
  */
 public class TableAlreadyOpenException extends RuntimeException {
     public TableAlreadyOpenException(String name) {

@@ -1,11 +1,7 @@
 package bowtie.core.exceptions;
 
 /**
- * Created with IntelliJ IDEA.
- * User: dan
- * Date: 6/26/14
- * Time: 12:33 AM
- * To change this template use File | Settings | File Templates.
+ * Thrown if the user attempts to write to, read from, open, close, or drop a table that hasn't been created.
  */
 public class TableDoesNotExistException extends RuntimeException {
     public TableDoesNotExistException(String name) {

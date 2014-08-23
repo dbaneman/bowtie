@@ -1,11 +1,7 @@
 package bowtie.core.exceptions;
 
 /**
- * Created with IntelliJ IDEA.
- * User: dan
- * Date: 6/29/14
- * Time: 3:50 PM
- * To change this template use File | Settings | File Templates.
+ * Thrown if user attempts to write to, read from, or close and table that is closed.
  */
 public class ClosedTableException extends RuntimeException {
     public ClosedTableException(String name) {

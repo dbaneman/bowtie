@@ -1,16 +1,11 @@
 package bowtie.core;
 
 import bowtie.core.exceptions.InvalidScanParametersException;
-import bowtie.core.internal.Conf;
 
 import java.io.IOException;
 
 /**
- * Created with IntelliJ IDEA.
- * User: dan
- * Date: 1/27/14
- * Time: 8:45 PM
- * To change this template use File | Settings | File Templates.
+ * Represents an underlying bowtie key-value store.
  */
 public interface Table {
 
@@ -106,10 +101,4 @@ public interface Table {
      * @throws IOException
      */
     void compactMajor() throws IOException;
-
-    /**
-     * Returns the configuration underlying this table.
-     * @return
-     */
-    Conf getConf();
 }

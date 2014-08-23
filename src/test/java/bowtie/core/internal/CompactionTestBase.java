@@ -1,5 +1,6 @@
 package bowtie.core.internal;
 
+import bowtie.core.BowtieFactory;
 import bowtie.core.Result;
 import bowtie.core.Table;
 import org.junit.*;
@@ -26,7 +27,7 @@ public abstract class CompactionTestBase {
         conf.set(Conf.BYTES_BETWEEN_INDEXED_KEYS, 15);
         conf.set(Conf.MAX_MEM_STORE_SIZE, 35);
         conf.set(Conf.MAX_DATA_FILE_SIZE, 85);
-        table = new TableImpl(conf, TableImplTest.TEST_TABLE_NAME);
+        table = (TableImpl) BowtieFactory.newTable(conf, TableImplTest.TEST_TABLE_NAME);
         if (table.exists()) {
             table.drop();
         }

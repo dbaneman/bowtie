@@ -1,8 +1,8 @@
-- add comments
-- remove (instead of just marking as deleted) deleted values during major compaction
+- to save space, remove (instead of just marking as deleted) deleted values during major compaction
 - bloom filters
 - add pools for getting tables
 - figure out concurrency and thread safety!
+--> compaction should occur automatically and should run on a background thread
 - decide whether we want non-flushed writes to be readable after shutdown. if yes:
 --> log everything before writing it to memory (this can't be the actual data file because it won't be ordered)
 --> clear log after flush to disk

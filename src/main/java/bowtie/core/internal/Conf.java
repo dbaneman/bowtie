@@ -22,15 +22,22 @@ public class Conf {
     private final Config config;
     private final Map<String, Object> parameterCache;
 
-    public Conf(Config config) {
+    private Conf(Config config) {
         this.config = config;
         parameterCache = new HashMap<String, Object>();
     }
 
+    /**
+     * Create a bowtie configuration from the file with the given path.
+     * @param confFileLocation
+     */
     public Conf(String confFileLocation) {
         this(ConfigFactory.load(confFileLocation));
     }
 
+    /**
+     * Create a bowtie configuration using the default parameters.
+     */
     public Conf() {
         this(ConfigFactory.load());
     }

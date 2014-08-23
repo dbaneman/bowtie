@@ -3,7 +3,7 @@ package bowtie.core.exceptions;
 import bowtie.core.internal.util.ByteUtils;
 
 /**
- * Created by dan on 8/23/14.
+ * Thrown if users executes a scan where the start key isn't lexicographically prior to the end key.
  */
 public class InvalidScanParametersException extends Exception {
 

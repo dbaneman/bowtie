@@ -58,7 +58,6 @@ public class TableImpl implements Table {
         fsTable.compactMajor();
     }
 
-    @Override
     public Conf getConf() {
         return conf;
     }

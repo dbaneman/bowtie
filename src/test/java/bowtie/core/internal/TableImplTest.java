@@ -1,5 +1,6 @@
 package bowtie.core.internal;
 
+import bowtie.core.BowtieFactory;
 import bowtie.core.Result;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +29,7 @@ public class TableImplTest {
 
     @Before
     public void before() throws Exception {
-        table = new TableImpl(new Conf(), TEST_TABLE_NAME);
+        table = (TableImpl) BowtieFactory.newTable(new Conf(), TEST_TABLE_NAME);
         if (table.exists()) {
             table.drop();
         }
