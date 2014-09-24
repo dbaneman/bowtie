@@ -14,12 +14,23 @@ public class BowtieFactory {
     /**
      * Creates a new table object with the supplied configuration.
      * @param tableName table name
+     * @param conf custom conf object
+     * @return
+     * @throws IOException
+     */
+    public static Table newTable(String tableName, Conf conf) throws IOException {
+        return new TableImpl(conf, tableName);
+    }
+
+    /**
+     * Creates a new table object with the supplied configuration.
+     * @param tableName table name
      * @param confFileLocation absolute path of custom config file
      * @return
      * @throws IOException
      */
     public static Table newTable(String tableName, String confFileLocation) throws IOException {
-        return new TableImpl(new Conf(confFileLocation), tableName);
+        return newTable(tableName, new Conf(confFileLocation));
     }
 
     /**

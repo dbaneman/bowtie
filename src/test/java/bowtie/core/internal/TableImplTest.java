@@ -29,7 +29,7 @@ public class TableImplTest {
 
     @Before
     public void before() throws Exception {
-        table = (TableImpl) BowtieFactory.newTable(new Conf(), TEST_TABLE_NAME);
+        table = (TableImpl) BowtieFactory.newTable(TEST_TABLE_NAME);
         if (table.exists()) {
             table.drop();
         }

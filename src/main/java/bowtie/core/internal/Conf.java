@@ -3,6 +3,7 @@ package bowtie.core.internal;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class Conf {
      * @param confFileLocation
      */
     public Conf(String confFileLocation) {
-        this(ConfigFactory.load(confFileLocation));
+        this(ConfigFactory.parseFile(new File(confFileLocation)).withFallback(ConfigFactory.load()).resolve());
     }
 
     /**

@@ -27,7 +27,7 @@ public abstract class CompactionTestBase {
         conf.set(Conf.BYTES_BETWEEN_INDEXED_KEYS, 15);
         conf.set(Conf.MAX_MEM_STORE_SIZE, 35);
         conf.set(Conf.MAX_DATA_FILE_SIZE, 85);
-        table = (TableImpl) BowtieFactory.newTable(conf, TableImplTest.TEST_TABLE_NAME);
+        table = (TableImpl) BowtieFactory.newTable(TableImplTest.TEST_TABLE_NAME, conf);
         if (table.exists()) {
             table.drop();
         }
